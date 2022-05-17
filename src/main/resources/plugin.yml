@@ -1,0 +1,24 @@
+name: HCraftEnchantment
+version: '${project.version}'
+main: me.dakto101.HCraftEnchantment
+api-version: 1.18
+authors: [ dakto101 ]
+description: Plugin phu phep HCraft
+commands:
+  he:
+    description: Danh sach lenh cua HCraftEnchantment
+    aliases: [hcraftenchantment]
+    permission: hcraftenchantment.admin
+    usage: Sai lệnh, hoặc không có quyền truy cập.
+  hce:
+    description: Danh sach lenh danh cho member cua HCraftEnchantment
+    permission: hcraftenchantment.member
+    usage: Sai lệnh, hoặc không có quyền truy cập.
+permissions:
+  hcraftenchantment.*:
+    description: Gives access to all HCraftEnchantment commands and feature.
+    children:
+      hcraftenchantment.admin: true
+  hcraftenchantment.admin:
+    description: Allows you to access admin command.
+    default: op
