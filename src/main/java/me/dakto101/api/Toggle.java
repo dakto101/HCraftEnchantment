@@ -83,7 +83,7 @@ public class Toggle {
     	private String name;
 
         /**
-         * An enum set name and id for a specific skill.
+         * An enum set type for a specific toggle.
          */
     	ToggleType(final String name) {
     		this.name = name;
