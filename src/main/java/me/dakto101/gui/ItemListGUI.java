@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import io.netty.util.internal.ThreadLocalRandom;
 import me.dakto101.HCraftEnchantment;
-import me.dakto101.HPermission;
+import me.dakto101.permission.HPermission;
 import me.dakto101.api.CustomEnchantmentType;
 import me.dakto101.item.Amulet;
 import me.dakto101.item.ItemQuality;
@@ -34,7 +34,7 @@ public class ItemListGUI {
 	}
 	
 	public static void click(HumanEntity player, int slot) {
-		if (player.hasPermission(HPermission.COMMAND_ADMIN)) {
+		if (player.hasPermission(HPermission.COMMAND_ADMIN.toString())) {
 			switch (slot) {
 			case 53: {
 				player.openInventory(AdminMenuGUI.adminMenu);
