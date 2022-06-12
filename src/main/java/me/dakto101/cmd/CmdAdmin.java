@@ -95,8 +95,7 @@ public class CmdAdmin implements TabExecutor {
 			return;
 		}
 		if (args.length < 3) return;
-		
-		//List<String> s = new ArrayList<String>();
+
 		String name = "", slevel = "";
 		for (int i = 1; i < args.length; i++) {
 			//s.add(args[i].toString());
@@ -126,6 +125,7 @@ public class CmdAdmin implements TabExecutor {
 				item = ce.addToItem(item, level);
 				p.getInventory().setItemInMainHand(item);
 				p.sendMessage("§aThêm phù phép thành công.");
+				p.hasPermission("s");
 			} else {
 				p.sendMessage("§cBạn phải cầm vật phẩm cần phù phép trên tay!");
 			}
