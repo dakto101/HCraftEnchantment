@@ -36,7 +36,7 @@ public class Luot extends Skill {
 		super(SkillEnum.LUOT, Arrays.asList(
 				"§7§nKích hoạt: §n§7Lướt một đoạn theo hướng chỉ định, gây §9(0.5 + 0.05 X Cấp)§7 sát thương ",
 				"§7phép cho kẻ địch trúng phải. Sát thương tăng thành §9(1 + 0.1 X Cấp)§7 cho quái và mob. Mục ",
-				"§7tiêu có thể bị trúng nhiều lần, tối đa 8 lần. (Click phải)",
+				"§7tiêu có thể bị trúng nhiều lần, tối đa 8 lần. (Shift + Click phải)",
 				"",
 				"§7§nBị động: ",
 				"§7- Chặn §6(0.3 + 0.1 X Cấp)§7 sát thương vật lý khi bị tấn công bằng kiếm hoặc rìu."

@@ -31,7 +31,7 @@ public class DamMoc extends Skill {
 		super(SkillEnum.DAM_MOC, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Tung cú đấm vào mục tiêu, gây §6(1 + 0.2 X Cấp)§7 sát thương vật lý và ",
 				"§7hất tung mục tiêu. Cú đấm được tính như đòn đánh thường, nhận được sát thương",
-				"§7cộng thêm và hiệu ứng từ bị động. (Click phải)",
+				"§7cộng thêm và hiệu ứng từ bị động. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
 				"§7- Tăng §6(2.2 + 0.18 X Cấp)§7 sát thương vật lý khi dùng tay không.",

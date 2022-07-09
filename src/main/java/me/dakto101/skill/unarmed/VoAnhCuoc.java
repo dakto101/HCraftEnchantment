@@ -33,7 +33,7 @@ public class VoAnhCuoc extends Skill {
 		super(SkillEnum.VO_ANH_CUOC, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Tung cú đá chí tử vào mục tiêu, gây §6(8 + 1.5 X Cấp)§7 sát thương vật lý, ",
 				"§7hất văng mục tiêu. Cú đá được tính như đòn đánh thường, nhận được sát thương",
-				"§7cộng thêm và hiệu ứng từ bị động. (Click phải)",
+				"§7cộng thêm và hiệu ứng từ bị động. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
 				"§7- Tăng §6(2.7 + 0.15 X Cấp)§7 sát thương vật lý khi dùng tay không.",

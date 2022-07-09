@@ -49,7 +49,7 @@ public class PhaoCoi extends Skill {
 				"§7sát thương nổ."
 				), 10d, SkillType.ARCHERY);
 		setFoodRequire(8);
-		setCooldown(30);
+		setCooldown(15);
 		setIcon(Material.FIRE_CHARGE);
 		
 	}

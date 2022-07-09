@@ -28,7 +28,7 @@ public class BatTu extends Skill {
 	
 	public BatTu() {
 		super(SkillEnum.BAT_TU, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Chặn toàn bộ sát thương trong §f(2 + 0.3 X Cấp)§7 giây. (Click phải)",
+				"§7§nKích hoạt:§r§7 Chặn toàn bộ sát thương trong §f(2 + 0.3 X Cấp)§7 giây. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
 				"§7- Có §f10%§7 cơ hội né được đòn đánh cận chiến khi dùng tay không.",

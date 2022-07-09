@@ -32,7 +32,7 @@ public class LaChan extends Skill {
 	public LaChan() {
 		super(SkillEnum.LA_CHAN, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Nhận lớp lá chắn hấp thụ §e(2 X Cấp + 15% máu tối đa)§7 sát thương ",
-				"§7trong 5 giây. (Click phải)",
+				"§7trong 5 giây. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
 				"§r§7- Khi bị đánh có §f8%§7 nhận được lá chắn hấp thụ §e(2 + 0.5 X Cấp)",

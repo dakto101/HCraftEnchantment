@@ -73,7 +73,7 @@ public class CmdAdmin implements TabExecutor {
      * @param sender
      */
     private void sendHelpMessage(CommandSender sender) {
-        sender.sendMessage("§3----------HCraftEnchantment----------");
+        sender.sendMessage("§3----------HCraftEnchantment Admin----------");
         sender.sendMessage("§3/he add <enchantment> <cấp>: Thêm phù phép vào vật phẩm đang cầm trên tay.");
         sender.sendMessage("§3/he remove <enchantment/all>: Xóa một/tất cả phù phép khỏi vật phẩm đang cầm trên tay.");
         sender.sendMessage("§3/he menu: Xem menu cho admin.");

@@ -38,7 +38,7 @@ public class XoayKiem extends Skill {
 	public XoayKiem() {
 		super(SkillEnum.XOAY_KIEM, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Xoay kiếm xung quanh trong 5 giây, gây §6(1.65 + Cấp X 0.18)§7 sát thương ",
-				"§7vật lý cho kẻ địch bị trúng chiêu.",
+				"§7vật lý cho kẻ địch bị trúng chiêu. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§7- Đòn đánh thường có §f1%§7 cơ hội tăng thêm §6200% + 10% X Cấp§7 sát thương vật lý."

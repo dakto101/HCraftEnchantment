@@ -39,7 +39,7 @@ public class TuBao extends Skill {
 		super(SkillEnum.TU_BAO, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Phóng một luồng khí ra phía trước, gây §6(1 + 0.25 X Cấp)§7 sát ",
 				"§7thương vật lý cho kẻ địch trúng phải. Khi tích đủ 3 lần sẽ hất ",
-				"§7tung kẻ địch. (Click phải)",
+				"§7tung kẻ địch. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§7- Đòn đánh có §f10%§7 tỉ lệ hất tung mục tiêu."

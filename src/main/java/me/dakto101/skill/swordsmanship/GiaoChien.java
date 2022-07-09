@@ -42,7 +42,7 @@ public class GiaoChien extends Skill {
 				"§7§nKích hoạt:§r§7 Bắn ra quả cầu ma thuật, khi trúng kẻ địch sẽ đánh dấu ",
 				"§7trong 5 giây và gây §9(1 + 0.5 X Cấp)§7 sát thương phép. Kẻ địch bị đánh ",
 				"§7dấu sẽ nhận thêm §61 X Cấp + 10% máu hiện tại §7 sát thương vật lý từ ",
-				"§7đòn đánh cận chiến. (Click phải)",
+				"§7đòn đánh cận chiến. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§r§7- Khi bị đánh có §f10%§7 nhận được lá chắn hấp thụ §e(3 + 0.5 X Cấp) sát thương."
@@ -126,8 +126,10 @@ public class GiaoChien extends Skill {
 			
 			double health = target.getHealth() > 100 ? 100 : target.getHealth();
 			double damage = 1 * level + 0.1 * health;
-			
+
+			//Apply mark
 			if (MARKED.get(user) != null && MARKED.get(user).equals(target)) {
+				user.sendMessage("§6" + this.getName() + "§7 gây thêm §6" + damage + "§7 sát thương vật lý.");
 				e.setDamage(e.getDamage() + damage);
 				target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, 1, 1);
 				MARKED.remove(user);
