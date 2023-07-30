@@ -14,6 +14,10 @@ public class SkillAPI {
 	
 	public static final Map<SkillEnum, Skill> SKILLS = new HashMap<SkillEnum, Skill>();
 
+    /** Add skill
+     *
+     * @param skills list of skill
+     */
 	public static void registerEnchantments(Skill... skills) {
 		for (Skill skill : skills) {
 			if (!SkillAPI.SKILLS.containsKey(skill.getSkillEnum())) SkillAPI.SKILLS.put(skill.getSkillEnum(), skill);
@@ -25,6 +29,13 @@ public class SkillAPI {
 			}
 		}
 	}
+
+    /**
+     *
+     */
+    public static void unregisterEnchantments() {
+        SkillAPI.SKILLS.clear();
+    }
 	
     /**
      * @param name skill name

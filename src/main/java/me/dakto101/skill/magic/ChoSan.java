@@ -30,7 +30,6 @@ import me.dakto101.api.Cooldown.CooldownType;
 import me.dakto101.api.Skill;
 import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.ParticleEffect;
 
@@ -46,29 +45,32 @@ public class ChoSan extends Skill {
 				"",
 				"§7- Chỉ số của §bChó săn§7:",
 				"§7+ Máu: §c30 (+ 6.5 X Cấp)",
-				"§7+ Sát thương: §63.2 (+ 0.65 X Cấp)",
+				"§7+ Sát thương: §66.5 (+ 0.35 X Cấp)",
 				"§7+ Giáp: §e2",
 				"",
 				"§7- Chỉ số của §fChó săn nhỏ§7:",
 				"§7+ Máu: §c10",
-				"§7+ Sát thương: §62",
+				"§7+ Sát thương: §64",
 				"§7+ Giáp: §e1",
 				"",
 				"§7§nBị động:",
 				"§7- Giảm §610%§7 sát thương vật lý từ quái.",
-				"§7- Gây thêm §90.85 + 0.09 X Cấp§7 sát thương phép khi dùng sách làm vũ khí."
+				"§7- Gây thêm §91.9 + 0.24 X Cấp§7 sát thương phép khi dùng sách làm vũ khí.",
+				"§7- Gây thêm §64.5 + 0.22 X Cấp§7 sát thương vật lý khi dùng sách làm vũ khí."
 				), 10, SkillType.MAGIC);
-		setFoodRequire(15);
-		setCooldown(60);
+		setFoodRequire(14);
+		setActiveCooldown(50);
+		setPassiveCooldown(0.1);
 		setIcon(Material.WOLF_SPAWN_EGG);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("30 (+ 6.5 X Cấp)", "" + (30 + 6.5 * level)));
-    	description.replaceAll(s -> s.replace("3.2 (+ 0.65 X Cấp)", "" + (3.2 + 0.65 * level)));
-    	description.replaceAll(s -> s.replace("0.85 + 0.09 X Cấp", "" + (0.85 + 0.09 * level)));
+    	description.replaceAll(s -> s.replace("30 (+ 6.5 X Cấp)", "" + (float) (30 + 6.5 * level)));
+    	description.replaceAll(s -> s.replace("6.5 (+ 0.35 X Cấp)", "" + (float) (6.5 + 0.35 * level)));
+		description.replaceAll(s -> s.replace("1.9 + 0.24 X Cấp", "" + (float) (1.9 + 0.24 * level)));
+		description.replaceAll(s -> s.replace("4.5 + 0.22 X Cấp", "" + (float) (4.5 + 0.22 * level)));
     	return description;
     }
 	
@@ -76,11 +78,11 @@ public class ChoSan extends Skill {
 	@Override
 	public void applyInteractBlock(final Player user, final int level, final PlayerInteractEvent e) { 
 		if (!user.isSneaking()) return;
-		if (e.getAction().equals(Action.RIGHT_CLICK_AIR) || 
+		if (e.getAction().equals(Action.RIGHT_CLICK_AIR) ||
 				e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
 			//Condition
-			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-				Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+				Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 				return;
 			}
 			if (user.getFoodLevel() < getFoodRequire()) {
@@ -90,14 +92,15 @@ public class ChoSan extends Skill {
 				user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 			}
 			//Param
-			Location loc = e.getClickedBlock().getLocation().add(0, 1, 0);
+			Location loc = user.getEyeLocation().add(0, 1, 0);
 			//Code
+			user.swingMainHand();
 			spawnWolf(user, loc, level);
 			spawnWolf(user, loc.add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3), 0);
 			spawnWolf(user, loc.add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3), 0);
 			spawnWolf(user, loc.add(Math.random() * 6 - 3, 0, Math.random() * 6 - 3), 0);
 			
-			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+			Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		}
 		
 	}
@@ -107,7 +110,7 @@ public class ChoSan extends Skill {
 		//Param
 		double health = level == 0 ? 10 : 30 + 6.5 * level;
 		double speed = 0.4;
-		double damage = level == 0 ? 2 : 3.2 + 0.65 * level;
+		double damage = level == 0 ? 4 : 6.5 + 0.35 * level;
 		double armor = level == 0 ? 1 : 2;
 		long duration = 20 * 25;
 		//Code
@@ -125,9 +128,8 @@ public class ChoSan extends Skill {
 		wolf.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(damage);
 		wolf.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(armor);
 		wolf.setHealth(health);
-		if (level == 0) {
-			wolf.setBaby();
-		}
+		if (level == 0) wolf.setBaby();
+
 		
 		ParticleEffect.createNearbyParticle(wolf.getLocation(), 200, Particle.ENCHANTMENT_TABLE, 2, 3, 2, new Vector(0, 0.2, 0), null);
 		wolf.getWorld().playSound(wolf.getLocation(), Sound.ENTITY_EVOKER_PREPARE_SUMMON, 1, 0);
@@ -152,14 +154,24 @@ public class ChoSan extends Skill {
     	}
     }
 	
-	//Passive2
+	//Passive 2 3
 	@Override
 	public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
 		if (this.getMaterialList().contains(user.getEquipment().getItemInMainHand().getType())) {
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE_SKILL)) return;
 			if (e.getCause().equals(DamageCause.ENTITY_ATTACK)) {
-				float damage = (float) (0.85 + 0.09 * level);
-				HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, damage);
-				target.getWorld().spawnParticle(Particle.SPELL_WITCH, target.getEyeLocation(), (int) (damage*10));
+				Cooldown.setCooldown(user.getUniqueId(), getPassiveCooldown(), CooldownType.PASSIVE_SKILL);
+				// Passive 2
+				Cooldown.setCooldown(user.getUniqueId(), getPassiveCooldown(), CooldownType.PASSIVE_SKILL);
+
+				float magicDamage = (float) (1.9 + 0.24 * level);
+
+				HCraftDamageSource.damageIndirectMagic(user, target, magicDamage);
+				target.getWorld().spawnParticle(Particle.SPELL_WITCH, target.getEyeLocation(), (int) (10 + magicDamage * 2));
+				// Passive 3
+				float meleeDamage = (float) (4.5 + 0.22 * level);
+				// Damage normal chứ không dùng setDamage() để khỏi bị stack với damage phép.
+				HCraftDamageSource.damageNormalAttack(user, target, meleeDamage);
 			}
 		}
 	}

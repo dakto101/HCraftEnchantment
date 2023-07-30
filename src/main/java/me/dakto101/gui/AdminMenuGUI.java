@@ -22,6 +22,10 @@ public class AdminMenuGUI {
 	public static void register() {
 		registerEnchantmentTypeGUI();
 	}
+
+	public static void unregister() {
+		adminMenu = null;
+	}
 	
 	private static void registerEnchantmentTypeGUI() {
 		

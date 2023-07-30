@@ -10,14 +10,14 @@ import me.dakto101.api.CustomEnchantmentType;
 public class KhangDoc extends CustomEnchantment {
 
 	public KhangDoc() {
-		super("Kháng độc", "§7Giảm §a5% X Cấp§7 cho sát thương độc tính nhận vào.", 5);
+		super("Kháng độc", "§7Giảm §a(5 X Cấp)%§7 cho sát thương độc tính nhận vào.", 5);
 		setCanStack(true);
 		setType(CustomEnchantmentType.DEFENSE);
 	}
 	
 	@Override
 	public String getDescription(int level, final LivingEntity user) {
-		return this.getDescription().replace("5% X Cấp", "" + (5 * level) + "%");
+		return this.getDescription().replace("(5 X Cấp)", "" + (5 * level) + "%");
 	}
 	
 	@Override

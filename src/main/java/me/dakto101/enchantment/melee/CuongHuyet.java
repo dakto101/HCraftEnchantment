@@ -34,7 +34,7 @@ public class CuongHuyet extends CustomEnchantment {
 		if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || 
 				e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK)) {
 			//Cooldown
-			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE)) return;
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.MELEE_ENCHANTMENT)) return;
 			
 			double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 			double health = user.getHealth();
@@ -45,7 +45,7 @@ public class CuongHuyet extends CustomEnchantment {
 			user.sendMessage("§aNhận §c" + amount + "§a máu và tăng tốc độ chạy.");
 			user.getWorld().playSound(user.getLocation(), Sound.ENTITY_PLAYER_BURP, 1, 1);
 			//Cooldown start timing.
-			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.PASSIVE);
+			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.MELEE_ENCHANTMENT);
 		}
 		
 

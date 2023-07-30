@@ -37,7 +37,7 @@ public class ThuocNo extends CustomEnchantment {
 	@Override
     public void applyProjectile(final LivingEntity user, final int level, final EntityShootBowEvent e) {
 		
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.BOW)) return;
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.BOW_ENCHANTMENT)) return;
 		
 		float power = (float) (1 + 0.2 * level);
 		Entity a = e.getProjectile();
@@ -69,7 +69,7 @@ public class ThuocNo extends CustomEnchantment {
 			CHECK.remove(user);
 		}, 200L);
 		
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.BOW);
+		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.BOW_ENCHANTMENT);
 	}
 	
 	

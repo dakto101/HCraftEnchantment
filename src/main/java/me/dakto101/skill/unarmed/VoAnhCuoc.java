@@ -36,20 +36,20 @@ public class VoAnhCuoc extends Skill {
 				"§7cộng thêm và hiệu ứng từ bị động. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
-				"§7- Tăng §6(2.7 + 0.15 X Cấp)§7 sát thương vật lý khi dùng tay không.",
+				"§7- Tăng §6(5.4 + 0.15 X Cấp)§7 sát thương vật lý khi dùng tay không.",
 				"§7- Hồi máu bằng §c(4 + Cấp)%§7 sát thương gây ra từ kỹ năng và đòn đánh tay không."
 				), 10d, SkillType.UNARMED);
 		setFoodRequire(20);
-		setCooldown(60);
+		setActiveCooldown(60);
 		setIcon(Material.RABBIT_HIDE);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(8 + 1.5 X Cấp)", "" + (8.0 + 1.5 * level)));
-    	description.replaceAll(s -> s.replace("(2.7 + 0.15 X Cấp)", "" + (2.7 + 0.15 * level)));
-    	description.replaceAll(s -> s.replace("(4 + Cấp)", "" + (4 + level)));
+    	description.replaceAll(s -> s.replace("(8 + 1.5 X Cấp)", "" + (float) (8.0 + 1.5 * level)));
+    	description.replaceAll(s -> s.replace("(5.4 + 0.15 X Cấp)", "" + (float) (5.4 + 0.15 * level)));
+    	description.replaceAll(s -> s.replace("(4 + Cấp)", "" + (float) (4 + level)));
     	return description;
     }
 	
@@ -63,8 +63,8 @@ public class VoAnhCuoc extends Skill {
 		if (!(entity instanceof LivingEntity)) return;
 		LivingEntity target = (LivingEntity) entity;
 		if (!Utils.canAttack(user, target)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -75,7 +75,8 @@ public class VoAnhCuoc extends Skill {
 		}
 		
 		float damage = 8 + 1.5f * level;
-		
+
+		user.swingMainHand();
 		BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 		s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 			Vector v = user.getEyeLocation().getDirection();
@@ -88,7 +89,7 @@ public class VoAnhCuoc extends Skill {
     	HCraftDamageSource.damageNormalAttack(user, target, damage);
 		
 		//Cooldown
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		
 	}
 	
@@ -98,12 +99,12 @@ public class VoAnhCuoc extends Skill {
 		if (user.getEquipment().getItemInMainHand().getType().equals(Material.AIR)) {
 			if (!e.getCause().equals(DamageCause.ENTITY_ATTACK)) return;
 			//Passive1
-			double bonusDamage1 = 2.8 + 0.13 * level;
+			double bonusDamage1 = 5.4 + 0.13 * level;
 			e.setDamage(e.getDamage() + bonusDamage1);
 			//Passive2
 			double healing = e.getFinalDamage() * (0.04 + 0.01 * level);
 			double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
-			user.setHealth(user.getHealth() + healing > maxHealth ? maxHealth : user.getHealth() + healing);
+			user.setHealth(Math.min(user.getHealth() + healing, maxHealth));
 		}
 	}
 	

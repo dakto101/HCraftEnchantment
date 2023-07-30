@@ -31,7 +31,6 @@ import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
 import me.dakto101.api.Toggle;
 import me.dakto101.api.Toggle.ToggleType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.Utils;
 
@@ -41,15 +40,15 @@ public class PhaoCoi extends Skill {
 
 	public PhaoCoi() {
 		super(SkillEnum.PHAO_COI, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Bắn ra đạn cối gây §6(3 + 0.26 X Cấp)§7 sát thương vật lý và nổ tung, ",
-				"§7gây §9(4 + 0.33 X Cấp)§7 sát thương nổ lên mục tiêu xung quanh. §7(Shift + Click trái)",
+				"§7§nKích hoạt:§r§7 Bắn ra đạn cối gây §6(3 + 0.55 X Cấp)§7 sát thương vật lý và nổ tung, ",
+				"§7gây §9(7 + 0.66 X Cấp)§7 sát thương nổ lên mục tiêu xung quanh. §7(Shift + Click trái)",
 				"",
 				"§7§nBị động:",
-				"§7- Có §f6%§7 cơ hội tạo một vụ nổ xung quanh mục tiêu, gây §9(3 + 0.28 X Cấp)§7",
+				"§7- Có §f6%§7 cơ hội tạo một vụ nổ xung quanh mục tiêu, gây §9(4 + 0.35 X Cấp)§7",
 				"§7sát thương nổ."
 				), 10d, SkillType.ARCHERY);
-		setFoodRequire(8);
-		setCooldown(15);
+		setFoodRequire(6);
+		setActiveCooldown(15);
 		setIcon(Material.FIRE_CHARGE);
 		
 	}
@@ -57,9 +56,9 @@ public class PhaoCoi extends Skill {
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(3 + 0.26 X Cấp)", "" + (3 + 0.26 * level)));
-    	description.replaceAll(s -> s.replace("(4 + 0.33 X Cấp)", "" + (4 + 0.33 * level)));
-    	description.replaceAll(s -> s.replace("(3 + 0.28 X Cấp)", "" + (3 + 0.28 * level)));
+    	description.replaceAll(s -> s.replace("(3 + 0.55 X Cấp)", "" + (3 + 0.55 * level)));
+    	description.replaceAll(s -> s.replace("(7 + 0.66 X Cấp)", "" + (7 + 0.66 * level)));
+    	description.replaceAll(s -> s.replace("(4 + 0.35 X Cấp)", "" + (4 + 0.35 * level)));
     	return description;
     }
 	
@@ -83,8 +82,8 @@ public class PhaoCoi extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -114,7 +113,7 @@ public class PhaoCoi extends Skill {
 		user.setVelocity(proj.getVelocity().multiply(-0.25));
 		user.getWorld().playSound(user.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST_FAR, 3, 0.75f);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 		
 	}
@@ -128,18 +127,18 @@ public class PhaoCoi extends Skill {
 			String name = e.getDamager().getCustomName();
 			if (name != null && name.equals(PHAO_COI)) {
 				//Param
-				double normalDmg = 3 + 0.26 * level;
-				float blastDmg = (float) (4 + 0.33 * level);
+				double normalDmg = 3 + 0.55 * level;
+				float blastDmg = (float) (7 + 0.66 * level);
 				double radius = 5;
 				//Code
-				e.setDamage(normalDmg);
+				e.setDamage(e.getDamage() + normalDmg);
 				target.getWorld().getNearbyEntities(target.getLocation(), radius, radius, radius, 
 						entity -> (entity instanceof LivingEntity) && 
 						(Utils.canAttack(user, (LivingEntity) entity) && 
 						(entity.getLocation().distance(target.getLocation()) < radius)))
 				.stream().limit(15).forEach(entity -> {
 					entity.setVelocity(entity.getVelocity().add(new Vector(Math.random()*0.5, 0.8 + Math.random()*0.1, Math.random()*0.5)));
-					HCraftDamageSource.damage(user, (LivingEntity) entity, DamageSourceEnum.IN_FIRE, blastDmg);
+					HCraftDamageSource.damageExplosion(user, (LivingEntity) entity, blastDmg);
 				});
 				target.getWorld().playSound(target.getLocation(), Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 2, 2);
 				target.getWorld().spawnParticle(Particle.FLAME, target.getLocation(), 500);
@@ -149,7 +148,7 @@ public class PhaoCoi extends Skill {
 			if (e.getDamager() instanceof Arrow) {
 				//Param
 				double chance = 0.06;
-				float dmg = (float) (3 + 0.28 * level);
+				float blastDmg = (float) (4 + 0.35 * level);
 				double radius = 5;
 				//Code
 				if (Math.random() < chance) {
@@ -165,7 +164,7 @@ public class PhaoCoi extends Skill {
 							(entity.getLocation().distance(target.getLocation()) < radius)))
 					.stream().limit(15).forEach(entity -> {
 						entity.setVelocity(entity.getVelocity().add(new Vector(Math.random()*0.5, 0.8 + Math.random()*0.1, Math.random()*0.5)));
-						HCraftDamageSource.damage(user, (LivingEntity) entity, DamageSourceEnum.IN_FIRE, dmg);
+								HCraftDamageSource.damageExplosion(user, (LivingEntity) entity, blastDmg);
 					});
 					
 				}

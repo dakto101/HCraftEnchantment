@@ -44,6 +44,7 @@ public class AdvancedEnchantedBook extends Item {
 	 */
 	@Override
 	public boolean isParsable(ItemStack item) {
+		if (item == null) return false;
 		if (!item.getType().equals(this.material)) return false;
 		if (!item.getItemMeta().getDisplayName().equals(this.getItemType().getName())) return false;
 		
@@ -104,10 +105,24 @@ public class AdvancedEnchantedBook extends Item {
 		this.quality = quality;
 	}
 
+	/** Calculate exp require from enchantments
+	 *
+	 * @return exp required
+	 */
+	public int getEnchantmentExpRequire() {
+		int require = 0;
+		for (CustomEnchantment enchantment : this.getEnchantments().keySet()) {
+			int rarity = enchantment.getRarity() > 50 ? 50 : ((int) enchantment.getRarity());
+			int level = this.getEnchantments().get(enchantment);
+			require += rarity * level * 10;
+		}
+		return require;
+	}
+
     // --- Functional Methods --- //
 	
 	/**
-	 * @param must be advance enchanted book.
+	 * @param item must be advance enchanted book.
 	 */
 	@Override
 	public void parse(final ItemStack item) {

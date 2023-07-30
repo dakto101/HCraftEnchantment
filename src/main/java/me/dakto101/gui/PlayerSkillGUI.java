@@ -17,10 +17,13 @@ public class PlayerSkillGUI {
 	public static final String PLAYER_SKILL = "§e§6§2§f§a§k§1§8§7§4§2§r§4§lDanh sách kỹ năng của bạn";
 	
 	public static Inventory playerSkillGui;
-
 	
 	public static void register() {
 		registerPlayerSkillGUI();
+	}
+
+	public static void unregister() {
+		playerSkillGui = null;
 	}
 	
 	public static void click(HumanEntity player, int slot) {

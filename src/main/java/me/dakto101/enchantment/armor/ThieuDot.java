@@ -35,7 +35,8 @@ public class ThieuDot extends CustomEnchantment {
 			int duration = 80;
 			
 			if (Math.random() > chance) return;
-			
+
+			// Tạo scheduled task để tránh deadlock
 			BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 			s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 				target.setFireTicks(target.getFireTicks() + duration);

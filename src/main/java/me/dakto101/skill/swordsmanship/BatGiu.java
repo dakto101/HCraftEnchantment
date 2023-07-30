@@ -34,23 +34,23 @@ public class BatGiu extends Skill {
 	
 	public BatGiu() {
 		super(SkillEnum.BAT_GIU, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Kéo mục tiêu lại, gây sát thương vật lý §6(3 + 0.72 X Cấp) §7và trói mục tiêu trong 3 ",
+				"§7§nKích hoạt:§r§7 Kéo mục tiêu lại, gây sát thương vật lý §6(6 + 0.72 X Cấp) §7và trói mục tiêu trong 3 ",
 				"§7giây. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
-				"§7- Mỗi 3 đòn đánh bằng kiếm hoặc rìu, gây thêm sát thương vật lý bằng §60.25 X Cấp + Bonus§7.",
-				"§7(§6Bonus§7 = 6% máu hiện tại của mục tiêu (bonus tối đa = §66§7 sát thương))."
+				"§7- Mỗi 3 lần dùng kỹ năng hoặc đòn đánh bằng kiếm hoặc rìu, gây thêm sát thương vật lý bằng",
+				"§7§60.4 X Cấp + Bonus §7(§6Bonus§7 = 6% máu hiện tại của mục tiêu (bonus tối đa = §66§7 sát thương))."
 				), 10d, SkillType.SWORDSMANSHIP);
 		setFoodRequire(2);
-		setCooldown(8);
+		setActiveCooldown(8);
 		setIcon(Material.LEAD);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(3 + 0.72 X Cấp)", "" + (3 + 0.72 * level)));
-    	description.replaceAll(s -> s.replace("0.25 X Cấp", "" + (0.25 * level)));
+    	description.replaceAll(s -> s.replace("(6 + 0.72 X Cấp)", "" + (6 + 0.72 * level)));
+    	description.replaceAll(s -> s.replace("0.4 X Cấp", "" + (0.4 * level)));
     	return description;
     }
 	
@@ -63,8 +63,8 @@ public class BatGiu extends Skill {
 		if (!(entity instanceof LivingEntity)) return;
 		LivingEntity target = (LivingEntity) entity;
 		if (!Utils.canAttack(user, target)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -74,13 +74,14 @@ public class BatGiu extends Skill {
 			user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 		}
 		//Param
-		float damage = 3.0f + 0.72f * level;
+		float damage = 6.0f + 0.72f * level;
 		Vector v = user.getEyeLocation().getDirection().multiply(-1);
 		BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 		int duration = 3 * 20;
 		//Code
 		
     	s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
+			user.swingMainHand();
 			target.setVelocity(v);
 			target.getWorld().playSound(target.getLocation(), Sound.ITEM_TRIDENT_HIT, 1, 0);
 			target.getWorld().playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASEDRUM, 1, 0);
@@ -92,7 +93,7 @@ public class BatGiu extends Skill {
 		}, 1L);
 		
 		//Cooldown
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 	//Passive
@@ -103,7 +104,7 @@ public class BatGiu extends Skill {
 		if (this.getMaterialList().contains(user.getEquipment().getItemInMainHand().getType())) {
 			//Param
 			double maxHealth = target.getHealth() > 100 ? 100 : target.getHealth();
-			double bonusDamage = maxHealth * 0.06 + 0.2 * level;
+			double bonusDamage = maxHealth * 0.06 + 0.4 * level;
 			//Code
     		if (STACK.size() > 100) STACK.clear();
     		STACK.putIfAbsent(user, 0);

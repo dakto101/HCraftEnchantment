@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.dakto101.util.ParticleEffect;
+import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractArrow.PickupStatus;
 import org.bukkit.entity.Arrow;
@@ -38,11 +41,11 @@ public class TanXaTien extends Skill {
 				"§7§nKích hoạt:§r§7 Tiêu thụ mũi tên để bắn ra §f(3 + Cấp)§7 mũi tên hình nón. (Shift + Click trái)",
 				"",
 				"§7§nBị động:",
-				"§7- Gây thêm §6(1 + 0.2 X Cấp + Bonus)§7 sát thương vật lý nếu bắn trúng kẻ địch cách hơn 20 ô.",
+				"§7- Gây thêm §6(2 + 0.3 X Cấp + Bonus)§7 sát thương vật lý nếu bắn trúng kẻ địch cách hơn 20 ô.",
 				"§7Bonus = §66%§7 máu hiện tại của mục tiêu (bonus tối đa = 6)."
 				), 10d, SkillType.ARCHERY);
 		setFoodRequire(0);
-		setCooldown(0);
+		setActiveCooldown(0);
 		setIcon(Material.STRING);
 		
 	}
@@ -51,7 +54,7 @@ public class TanXaTien extends Skill {
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
     	description.replaceAll(s -> s.replace("(3 + Cấp)", "" + (3 + level)));
-    	description.replaceAll(s -> s.replace("1 + 0.2 X Cấp", "" + (1 + 0.2 * level)));
+    	description.replaceAll(s -> s.replace("2 + 0.3 X Cấp", "" + (2 + 0.3 * level)));
     	return description;
     }
 	
@@ -75,7 +78,7 @@ public class TanXaTien extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -86,7 +89,7 @@ public class TanXaTien extends Skill {
 		//Code
 		volley(user, level, e);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 	}
 	
@@ -167,10 +170,11 @@ public class TanXaTien extends Skill {
 				&& user.getWorld().equals(target.getWorld()) && user.getLocation().distance(target.getLocation()) > 20) {
 			//Param
 			double bonus = target.getHealth() * 0.06 > 6 ? 6 : target.getHealth() * 0.06;
-			double bonusDamage = 1 + 0.2 * level + bonus;
+			double bonusDamage = 2 + 0.3 * level + bonus;
 			//Code
 			e.setDamage(e.getDamage() + bonusDamage);
 			user.getWorld().playSound(user.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+			ParticleEffect.createNearbyParticle(target.getEyeLocation(), 20, Particle.REDSTONE, 1, 1, 1, new Vector(), new Particle.DustOptions(Color.WHITE, 1));
 			if (bonus > 5) target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, 1, 1);
 		}
 		

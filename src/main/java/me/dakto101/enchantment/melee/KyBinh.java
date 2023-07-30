@@ -42,7 +42,7 @@ public class KyBinh extends CustomEnchantment {
 			
 				double bonusDamage = 2.5 + 2.5 * level;
 				//Cooldown
-				if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE)) {
+				if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.MELEE_ENCHANTMENT)) {
 					bonusDamage *= 0.5;
 					e.setDamage(e.getDamage() + bonusDamage);
 					return;
@@ -58,7 +58,7 @@ public class KyBinh extends CustomEnchantment {
 				target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 100, true, true, true));
 				user.sendMessage("§6" + this.getName() + "§7 gây thêm §6" + bonusDamage + "§7 sát thương vật lý cho mục tiêu.");
 				//Cooldown start timing.
-				Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.PASSIVE);
+				Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.MELEE_ENCHANTMENT);
 
 		}
 		

@@ -33,7 +33,7 @@ public class SucManh extends CustomEnchantment {
 		}
 		if ((e.getCause().equals(DamageCause.ENTITY_ATTACK)) || 
 				e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK)) {
-			chance = (55d)/100;
+			chance = (5d)/100;
 		}
 		if (chance <= 0d) return;
 		if (Math.random() > chance) return; 

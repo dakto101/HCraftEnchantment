@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.dakto101.listener.AdminListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -61,11 +62,16 @@ public class CmdAdmin implements TabExecutor {
             giveBookCommand(sender, args);
             return true;
         }
+        if (args[0].toString().equals("viewfinaldamage")) {
+            viewFinalDamage(sender, args);
+            return true;
+        }
 
 
         sendHelpMessage(sender);
         return true;
     }
+
 
     /**
      * Command: he help
@@ -81,6 +87,7 @@ public class CmdAdmin implements TabExecutor {
         sender.sendMessage("§3/he test: Test...");
         sender.sendMessage("§3/he clearcd: Clear dữ liệu cooldown.");
         sender.sendMessage("§3/he givebook randomenchantedbook <quality> <player>: Gửi sách cho người chơi");
+        sender.sendMessage("§3/he viewfinaldamage: Bật chế độ xem final damage trong bán kính 5 ô.");
         sender.sendMessage("§3/hce: Lệnh cho member.");
     }
 
@@ -219,10 +226,26 @@ public class CmdAdmin implements TabExecutor {
         }
     }
 
+    /**
+     * Command: he viewfinaldamage
+     */
+    private void viewFinalDamage(CommandSender sender, String[] args) {
+        if (sender instanceof Player) {
+            if (AdminListener.TOGGLE.contains(((Player) sender).getUniqueId())) {
+                AdminListener.TOGGLE.remove(((Player) sender).getUniqueId());
+                sender.sendMessage("§aĐã tắt chế độ xem final damage cho admin.");
+            } else {
+                AdminListener.TOGGLE.add(((Player) sender).getUniqueId());
+                sender.sendMessage("§aĐã bật chế độ xem final damage cho admin.");
+            }
+        }
+    }
+
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("add", "remove", "menu", "list", "test", "clearcd", "givebook");
+            return Arrays.asList("add", "remove", "menu", "list", "test", "clearcd", "givebook", "viewfinaldamage");
         }
         if (args.length == 2) {
             if (args[0].toString().equals("givebook")) {

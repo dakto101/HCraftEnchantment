@@ -57,7 +57,7 @@ public class Utils {
                 attacker,
                 target,
                 DamageCause.CUSTOM,
-                0.01);
+                0.0001);
         Bukkit.getPluginManager().callEvent(event);
         return !event.isCancelled();
     }

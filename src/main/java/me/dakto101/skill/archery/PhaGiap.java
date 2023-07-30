@@ -40,7 +40,7 @@ public class PhaGiap extends Skill {
 				"§7- Nhận §f10% + Cấp X 1%§7 xuyên giáp gây ra bởi mũi tên, đạn đạo của bạn."
 				), 10d, SkillType.ARCHERY);
 		setFoodRequire(2);
-		setCooldown(0);
+		setActiveCooldown(0.5);
 		setIcon(Material.ARROW);
 		
 	}
@@ -48,8 +48,8 @@ public class PhaGiap extends Skill {
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("0.1 + 0.02 X Cấp", "" + (0.1 + 0.02 * level)));
-    	description.replaceAll(s -> s.replace("2 + 0.4 X Cấp", "" + (2 + 0.4 * level)));
+    	description.replaceAll(s -> s.replace("0.1 + 0.02 X Cấp", "" + (float) (0.1 + 0.02 * level)));
+    	description.replaceAll(s -> s.replace("2 + 0.4 X Cấp", "" + (float)  (2 + 0.4 * level)));
     	description.replaceAll(s -> s.replace("10% + Cấp X 1%", "" + (10 + level * 1) + "%"));
     	return description;
     }
@@ -74,7 +74,7 @@ public class PhaGiap extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -95,7 +95,7 @@ public class PhaGiap extends Skill {
 			proj.remove();
 		}, 200L);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());	
 	}
 	

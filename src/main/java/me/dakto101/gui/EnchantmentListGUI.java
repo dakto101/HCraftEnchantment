@@ -41,6 +41,11 @@ public class EnchantmentListGUI {
 			POTION, RANGED, ULTILITY, OTHER
 		);
 	}
+
+	public static void unregister() {
+		enchantmentType = null;
+		enchantmentTypeDetails.clear();
+	}
 	
 	public static void click(HumanEntity player, int slot) {
 		CustomEnchantmentType type = null;

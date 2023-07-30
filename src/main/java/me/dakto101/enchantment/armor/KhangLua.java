@@ -10,14 +10,14 @@ import me.dakto101.api.CustomEnchantmentType;
 public class KhangLua extends CustomEnchantment {
 
 	public KhangLua() {
-		super("Kháng lửa", "§7Giảm §f5% X Cấp §7sát thương từ các hiệu ứng đốt cháy.", 5);
+		super("Kháng lửa", "§7Giảm §f(5 X Cấp)% §7sát thương từ các hiệu ứng đốt cháy.", 5);
 		setCanStack(true);
 		setType(CustomEnchantmentType.DEFENSE);
 	}
 	
 	@Override
 	public String getDescription(int level, final LivingEntity user) {
-		return this.getDescription().replace("5% X Cấp", "" + (5 * level) + "%");
+		return this.getDescription().replace("(5 X Cấp)", "" + (5 * level) + "%");
 	}
 	
 	@Override
@@ -29,6 +29,7 @@ public class KhangLua extends CustomEnchantment {
 			e.getCause().equals(DamageCause.FIRE_TICK) || 
 			e.getCause().equals(DamageCause.HOT_FLOOR) ||
 			e.getCause().equals(DamageCause.LAVA))
+
 		{
 			e.setDamage(e.getDamage() - reduction);
 		}

@@ -22,6 +22,13 @@ public class CustomEnchantmentAPI {
 			CustomEnchantmentAPI.CUSTOM_ENCHANTMENT.put(ce.getName(), ce);
 		}
 	}
+
+    /** Unregister all enchantments
+     *
+     */
+    public static void unregisterEnchantments() {
+        CustomEnchantmentAPI.CUSTOM_ENCHANTMENT.clear();
+    }
 	
     /**
      * @param name enchantment name

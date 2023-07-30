@@ -27,33 +27,34 @@ import me.dakto101.api.Cooldown.CooldownType;
 import me.dakto101.api.Skill;
 import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.ParticleEffect;
 import me.dakto101.util.Utils;
 
-@SuppressWarnings("deprecation")
 public class CuongPhong extends Skill {
 	
 	public CuongPhong() {
 		super(SkillEnum.CUONG_PHONG, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Biến thành cơn bão trong 5 giây gây §91.8 + 0.32 X Cấp§7 sát thương phép mỗi giây ",
+				"§7§nKích hoạt:§r§7 Biến thành cơn bão trong 5 giây gây §92.2 + 0.4 X Cấp§7 sát thương phép mỗi giây ",
 				"§7lên kẻ địch trong bán kính 5 ô và hất tung kẻ địch. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§7- Giảm §f6%§7 sát thương vật lý và phép nhận vào.",
-				"§7- Gây thêm §90.62 + 0.13 X Cấp§7 sát thương phép khi dùng sách làm vũ khí."
-				), 10d, SkillType.MAGIC);
+				"§7- Gây thêm §93 + 0.2 X Cấp§7 sát thương phép khi dùng sách làm vũ khí.",
+				"§7- Gây thêm §63 + 0.12 X Cấp§7 sát thương vật lý khi dùng sách làm vũ khí."
+		), 10d, SkillType.MAGIC);
 		setFoodRequire(10);
-		setCooldown(15);
+		setActiveCooldown(15);
+		setPassiveCooldown(0.1);
 		setIcon(Material.PHANTOM_MEMBRANE);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("1.8 + 0.32 X Cấp", "" + (1.8 + 0.32 * level)));
-    	description.replaceAll(s -> s.replace("0.62 + 0.13 X Cấp", "" + (0.62 + 0.13 * level)));
+    	description.replaceAll(s -> s.replace("2.2 + 0.4 X Cấp", "" + (float) (2.2 + 0.4 * level)));
+		description.replaceAll(s -> s.replace("3 + 0.2 X Cấp", "" + (float) (3 + 0.2 * level)));
+		description.replaceAll(s -> s.replace("3 + 0.12 X Cấp", "" + (float) (3 + 0.12 * level)));
     	return description;
     }
 	
@@ -81,10 +82,19 @@ public class CuongPhong extends Skill {
 	@Override
 	public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
 		if (this.getMaterialList().contains(user.getEquipment().getItemInMainHand().getType())) {
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE_SKILL)) return;
 			if (e.getCause().equals(DamageCause.ENTITY_ATTACK)) {
-				float damage = (float) (0.62 + 0.13 * level);
-				HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, damage);
-				target.getWorld().spawnParticle(Particle.SPELL_WITCH, target.getEyeLocation(), (int) (damage*10));
+				// Passive 2
+				Cooldown.setCooldown(user.getUniqueId(), getPassiveCooldown(), CooldownType.PASSIVE_SKILL);
+
+				float magicDamage = (float) (3 + 0.2 * level);
+
+				HCraftDamageSource.damageIndirectMagic(user, target, magicDamage);
+				target.getWorld().spawnParticle(Particle.SPELL_WITCH, target.getEyeLocation(), (int) (10 + magicDamage * 2));
+				// Passive 3
+				float meleeDamage = (float) (3 + 0.12 * level);
+				// Damage normal chứ không dùng setDamage() để khỏi bị stack với damage phép.
+				HCraftDamageSource.damageNormalAttack(user, target, meleeDamage);
 			}
 		}
 	}
@@ -92,7 +102,7 @@ public class CuongPhong extends Skill {
 	//Active
 	private void cast(final Player user, final int level) {
 		//Condition
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		user.getWorld().playSound(user.getLocation(), Sound.UI_LOOM_SELECT_PATTERN, 1, 2);
@@ -104,13 +114,17 @@ public class CuongPhong extends Skill {
 		double radius = 5;
 		long duration = 20 * 5;
 		long interval = 5L;
-		float damagePerSec = (float) (1.8 + 0.32 * level);
+		float damagePerSec = (float) (2.2 + 0.4 * level);
 		//Code
 		user.getWorld().playSound(user.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 		user.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, (int) duration, 1, true, true, true));
 		//Task
 		BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 		int taskID = s.scheduleSyncRepeatingTask(HCraftEnchantment.plugin, () -> {
+			Cooldown.setCooldown(user.getUniqueId(), getPassiveCooldown(), CooldownType.PASSIVE_SKILL);
+			if (Math.random() >= 0.5) user.swingMainHand();
+			else user.swingOffHand();
+
 			Location loc = user.getLocation();
 			loc.getWorld().playSound(loc, Sound.ITEM_TRIDENT_RIPTIDE_2, 1, (float) Math.random());
 			ParticleEffect.createCircleEffect(loc, 4, radius, Particle.CLOUD, new Vector(0, 0.3, 0), null);
@@ -124,16 +138,15 @@ public class CuongPhong extends Skill {
 				Vector v = entity.getLocation().subtract(loc).toVector().normalize().multiply(0.4);
 				v.setY(v.getY() + 0.4);
 				entity.setVelocity(v);
-				HCraftDamageSource.damage(user, (LivingEntity) entity, DamageSourceEnum.MAGIC, damagePerSec*interval/20);
+				HCraftDamageSource.damageIndirectMagic(user, (LivingEntity) entity, damagePerSec*interval/20);
 				entity.getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 10);
 			});
 		}, 0L, interval);
 		s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 			s.cancelTask(taskID);
-			
 		}, 100L);
 		//Cooldown
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 }

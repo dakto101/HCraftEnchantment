@@ -31,7 +31,7 @@ public class HutMau extends CustomEnchantment {
 			double amount = e.getFinalDamage() * 0.025 * level;
 			double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 			double health = user.getHealth();
-			user.setHealth((health + amount >= maxHealth) ? maxHealth : health + amount);
+			user.setHealth(Math.min(health + amount, maxHealth));
 			if (e.getFinalDamage() >= level * 3 + 7) user.getWorld().playSound(user.getLocation(), Sound.ENTITY_PLAYER_BURP, 1, 1);
 		}
 		

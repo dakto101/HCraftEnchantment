@@ -35,8 +35,8 @@ public class ChienMa extends Skill {
 	
 	public ChienMa() {
 		super(SkillEnum.CHIEN_MA, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Hất văng kẻ địch ra phía trước, gây §62.65 + Cấp X 0.55§7 sát thương vật lý ",
-				"§7và làm chậm kẻ địch 2 giây. Nếu đang cưỡi ngựa, sát thương tăng thành §65.3 + Cấp X 1.1§7 ",
+				"§7§nKích hoạt:§r§7 Hất văng kẻ địch ra phía trước, gây §65 + Cấp X 1.1§7 sát thương vật lý ",
+				"§7và làm chậm kẻ địch 2 giây. Nếu đang cưỡi ngựa, sát thương tăng thành §610 + Cấp X 1.1§7 ",
 				"§7và nhận thêm lá chắn chặn §e0.4 X Cấp§7 sát thương. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
@@ -45,16 +45,17 @@ public class ChienMa extends Skill {
 				"§7- Ngựa chiến sẽ nhận giảm §f65%§7 sát thương cơ bản nhận vào."
 				), 10d, SkillType.SWORDSMANSHIP);
 		setFoodRequire(2);
-		setCooldown(4);
+		setActiveCooldown(4);
 		setIcon(Material.SADDLE);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("2.65 + Cấp X 0.55", "" + (2.65 + level * 0.55)));
-    	description.replaceAll(s -> s.replace("5.3 + Cấp X 1.1", "" + (5.3 + level * 1.1)));
-    	description.replaceAll(s -> s.replace("20% + Cấp X 3%", "" + (20 + level * 3) + "%"));
+    	description.replaceAll(s -> s.replace("5 + Cấp X 1.1", "" + (5 + level * 1.1)));
+    	description.replaceAll(s -> s.replace("10 + Cấp X 1.1", "" + (10 + level * 1.1)));
+		description.replaceAll(s -> s.replace("20% + Cấp X 3%", "" + (20 + level * 3) + "%"));
+		description.replaceAll(s -> s.replace("0.4 X Cấp", "" + (0.4 * level)));
     	return description;
     }
 	
@@ -69,7 +70,7 @@ public class ChienMa extends Skill {
 		if (entity instanceof Horse) return;
 		LivingEntity target = (LivingEntity) entity;
 		if (!Utils.canAttack(user, target)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -79,13 +80,14 @@ public class ChienMa extends Skill {
 			user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 		}
 		//Param
-		float damage = isRidingHorse ? (2.65f + 0.55f * level) * 2 : 2.65f + 0.55f * level;
+		float damage = isRidingHorse ? (10f + level * 1.1f) : (5f + 1.1f) * level;
 		double barrier = 0.4 * level;
 		
 		Vector v = (isRidingHorse) ? ((Horse) user.getVehicle()).getEyeLocation().getDirection() : user.getLocation().getDirection();
 		BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 		int duration = 2 * 20;
 		//Code
+		user.swingMainHand();
 		v.setY(isRidingHorse ? 0.8 : 0.3);
 		if (isRidingHorse) {
 			user.getVehicle().setVelocity(user.getVehicle().getVelocity().add(new Vector(v.getX()*2, v.getY() + 0.3, v.getZ()*2)));
@@ -108,7 +110,7 @@ public class ChienMa extends Skill {
 		}, 2L);
 		
 		//Cooldown
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 	//Passive

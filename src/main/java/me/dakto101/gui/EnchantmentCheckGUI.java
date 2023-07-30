@@ -25,7 +25,10 @@ public class EnchantmentCheckGUI {
 	public static void register() {
 		registerEnchantmentCheckGUI();
 	}
-	
+
+	public static void unregister() {
+		enchantmentCheck = null;
+	}
 	
 	public static void open(HumanEntity player) {
 		Inventory inv = HCraftEnchantment.plugin.getServer().createInventory(null, 54, MENU);

@@ -32,7 +32,8 @@ public class TruyenLua extends CustomEnchantment {
 		if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || 
 			e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK) || 
 			e.getCause().equals(DamageCause.PROJECTILE)) {
-			
+
+			// Tạo scheduled task để tránh deadlock
 			BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 			s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 				int duration = user.getFireTicks();

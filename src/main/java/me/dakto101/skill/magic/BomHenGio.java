@@ -29,7 +29,6 @@ import me.dakto101.api.Cooldown.CooldownType;
 import me.dakto101.api.Skill;
 import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.ParticleEffect;
 import me.dakto101.util.Utils;
@@ -38,15 +37,17 @@ public class BomHenGio extends Skill {
 
 	public BomHenGio() {
 		super(SkillEnum.BOM_HEN_GIO, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Đặt quả bom sẽ kích nổ sau 4 giây vào mục tiêu, gây §9(4 + 0.45 X Cấp)§7",
+				"§7§nKích hoạt:§r§7 Đặt quả bom sẽ kích nổ sau 4 giây vào mục tiêu, gây §9(7.5 + 0.75 X Cấp)§7",
 				"§7sát thương nổ cho các mục tiêu xung quanh. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§7- Giảm §9(2 + Cấp)§7 sát thương nhận vào từ các vụ nổ.",
-				"§7- Gây thêm §9(0.8 + 0.11 X Cấp)§7 sát thương phép khi dùng sách làm vũ khí."
+				"§7- Gây thêm §9(2.8 + 0.15 X Cấp)§7 sát thương phép khi dùng sách làm vũ khí.",
+				"§7- Gây thêm §6(2.6 + 0.15 X Cấp)§7 sát thương vật lý khi dùng sách làm vũ khí."
 				), 10d, SkillType.MAGIC);
 		setFoodRequire(7);
-		setCooldown(10);
+		setActiveCooldown(10);
+		setPassiveCooldown(0.1);
 		setIcon(Material.TNT);
 		
 	}
@@ -54,9 +55,10 @@ public class BomHenGio extends Skill {
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(4 + 0.45 X Cấp)", "" + (4 + 0.45 * level)));
+    	description.replaceAll(s -> s.replace("(7.5 + 0.75 X Cấp)", "" + (float) (7.5 + 0.75 * level)));
     	description.replaceAll(s -> s.replace("(2 + Cấp)", "" + (2 + level)));
-    	description.replaceAll(s -> s.replace("(0.8 + 0.11 X Cấp)", "" + (0.8 + 0.11 * level)));
+		description.replaceAll(s -> s.replace("(2.8 + 0.15 X Cấp)", "" + (float) (2.8 + 0.15 * level)));
+		description.replaceAll(s -> s.replace("(2.6 + 0.15 X Cấp)", "" + (float) (2.6 + 0.15 * level)));
     	return description;
     }
 	
@@ -66,8 +68,8 @@ public class BomHenGio extends Skill {
 		Entity target = e.getRightClicked();
 		if (!user.isSneaking()) return;
 		if (!(target instanceof LivingEntity)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (!Utils.canAttack(user, (LivingEntity) target)) return;
@@ -77,21 +79,23 @@ public class BomHenGio extends Skill {
 		} else {
 			user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 		}
-		
+		Cooldown.setCooldown(user.getUniqueId(), getPassiveCooldown(), CooldownType.PASSIVE_SKILL);
+
 		active(user, level, e);
 		
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 	//Active
 	private void active(final Player user, final int level, final PlayerInteractEntityEvent e) {
 		//Param
 		double radius = 4;
-		float damage = (float) (4 + 0.45 * level);
+		float damage = (float) (7.5 + 0.75 * level);
 		Entity clicked = e.getRightClicked();
 		float timeInSec = 3;
 		//Code
 		user.getWorld().playSound(user.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+		user.swingMainHand();
 		BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 		TNTPrimed tnt = (TNTPrimed) e.getRightClicked().getWorld().spawnEntity(clicked.getLocation(), EntityType.PRIMED_TNT);
 		tnt.setYield(0f);
@@ -118,7 +122,8 @@ public class BomHenGio extends Skill {
 					(Utils.canAttack(user, (LivingEntity) entity) && (entity.getLocation().distance(loc) < radius)))
 			.stream().limit(15).forEach(entity -> {
 				entity.setVelocity(entity.getVelocity().add(new Vector(Math.random()*0.5, 0.8 + Math.random()*0.1, Math.random()*0.5)));
-				HCraftDamageSource.damage(user, (LivingEntity) entity, DamageSourceEnum.ON_FIRE, damage);
+				HCraftDamageSource.damageExplosion(user, (LivingEntity) entity, damage);
+
 			});
 		}, (long) (20 * timeInSec));
 	}
@@ -132,14 +137,22 @@ public class BomHenGio extends Skill {
     	}
     }
 	
-	//Passive2
+	//Passive 2 3
 	@Override
 	public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
 		if (this.getMaterialList().contains(user.getEquipment().getItemInMainHand().getType())) {
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE_SKILL)) return;
 			if (e.getCause().equals(DamageCause.ENTITY_ATTACK)) {
-				float damage = (float) (0.8 + 0.11 * level);
-				HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, damage);
-				target.getWorld().spawnParticle(Particle.SPELL_WITCH, target.getEyeLocation(), (int) (damage*10));
+				Cooldown.setCooldown(user.getUniqueId(), getPassiveCooldown(), CooldownType.PASSIVE_SKILL);
+				// Passive 2
+				float magicDamage = (float) (2.8 + 0.15 * level);
+
+				HCraftDamageSource.damageIndirectMagic(user, target, magicDamage);
+				target.getWorld().spawnParticle(Particle.SPELL_WITCH, target.getEyeLocation(), (int) (10 + magicDamage * 2));
+				// Passive 3
+				float meleeDamage = (float) (2.6 + 0.15 * level);
+				HCraftDamageSource.damageNormalAttack(user, target, meleeDamage);
+
 			}
 		}
 	}

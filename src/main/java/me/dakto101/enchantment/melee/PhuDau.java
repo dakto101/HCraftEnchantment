@@ -31,7 +31,7 @@ public class PhuDau extends CustomEnchantment {
 		if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || 
 				e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK)) {
 			//Cooldown
-			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE)) return;
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.MELEE_ENCHANTMENT)) return;
 			
 			//Max target health = 200.
 			double bonusDame = 2 + level * 2 + (0.16 * target.getHealth() > 32 ? 32 : 0.16 * target.getHealth());
@@ -39,7 +39,7 @@ public class PhuDau extends CustomEnchantment {
 			user.getWorld().playSound(user.getLocation(), Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, 1, 1);
 			user.sendMessage("§6" + this.getName() + "§7 gây thêm §6" + bonusDame + "§7 sát thương vật lý cho mục tiêu.");
 			//Cooldown start timing.
-			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.PASSIVE);
+			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.MELEE_ENCHANTMENT);
 		}
 		
 

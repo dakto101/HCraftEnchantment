@@ -37,13 +37,13 @@ public class HuyetCung extends Skill {
 	public HuyetCung() {
 		super(SkillEnum.HUYET_CUNG, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Bắn ra mũi tên hút máu, gây thêm §6(2 + 0.25 X Cấp)§7 sát thương ",
-				"§7vật lý và hồi §c(3 + 0.33 X Cấp)§7 máu nếu bắn trúng. (Shift + Click trái)",
+				"§7vật lý và hồi §c(1 + 0.15 X Cấp)§7 máu nếu bắn trúng. (Shift + Click trái)",
 				"",
 				"§7§nBị động:",
-				"§7- Nhận §c4% + 2% X Cấp§7 hút máu gây ra bởi mũi tên, đạn đạo của bạn."
+				"§7- Nhận §c3% + 1% X Cấp§7 hút máu gây ra bởi mũi tên, đạn đạo của bạn."
 				), 10d, SkillType.ARCHERY);
 		setFoodRequire(4);
-		setCooldown(10);
+		setActiveCooldown(6);
 		setIcon(Material.APPLE);
 		
 	}
@@ -52,8 +52,8 @@ public class HuyetCung extends Skill {
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
     	description.replaceAll(s -> s.replace("(2 + 0.25 X Cấp)", "" + (2 + 0.25 * level)));
-    	description.replaceAll(s -> s.replace("(3 + 0.33 X Cấp)", "" + (3 + 0.33 * level)));
-    	description.replaceAll(s -> s.replace("4% + 2% X Cấp", "" + (4 + level * 2) + "%"));
+    	description.replaceAll(s -> s.replace("(1 + 0.15 X Cấp)", "" + (1 + 0.15 * level)));
+    	description.replaceAll(s -> s.replace("3% + 1% X Cấp", "" + (3 + level * 1) + "%"));
     	return description;
     }
 	
@@ -77,7 +77,7 @@ public class HuyetCung extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -103,7 +103,7 @@ public class HuyetCung extends Skill {
 			s.cancelTask(taskID);
 		}, 200L);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());	
 	}
 	
@@ -115,7 +115,7 @@ public class HuyetCung extends Skill {
 			if (name != null && name.equals(HUYET_CUNG)) {
 				//Param
 				double bonusDmg = 2 + 0.25 * level;
-				double bonusHealth = 3 + 0.33 * level;
+				double bonusHealth = 1 + 0.15 * level;
 				double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 				double health = user.getHealth();
 				
@@ -129,7 +129,7 @@ public class HuyetCung extends Skill {
 			
 			//Passive
 			//Param
-			double leech = 0.04 + 0.02 * level;
+			double leech = 0.03 + 0.01 * level;
 			//Code
 			double amount = e.getFinalDamage() * leech;
 			double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();

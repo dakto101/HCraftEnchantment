@@ -33,7 +33,7 @@ public class BaoHiem extends CustomEnchantment {
 	
 	@Override
     public void applyDefense(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageEvent e) {
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ARMOR)) return;
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ARMOR_ENCHANTMENT)) return;
 		//
 		double health = user.getHealth();
 		double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
@@ -53,7 +53,7 @@ public class BaoHiem extends CustomEnchantment {
 			user.setAbsorptionAmount(0);
 		}, duration);
 		
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ARMOR);
+		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ARMOR_ENCHANTMENT);
 	}
 
 	

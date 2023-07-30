@@ -29,26 +29,26 @@ public class DamMoc extends Skill {
 
 	public DamMoc() {
 		super(SkillEnum.DAM_MOC, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Tung cú đấm vào mục tiêu, gây §6(1 + 0.2 X Cấp)§7 sát thương vật lý và ",
+				"§7§nKích hoạt:§r§7 Tung cú đấm vào mục tiêu, gây §6(2 + 0.2 X Cấp)§7 sát thương vật lý và ",
 				"§7hất tung mục tiêu. Cú đấm được tính như đòn đánh thường, nhận được sát thương",
 				"§7cộng thêm và hiệu ứng từ bị động. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
-				"§7- Tăng §6(2.2 + 0.18 X Cấp)§7 sát thương vật lý khi dùng tay không.",
-				"§7- Có §f10%§7 cơ hội hất tung mục tiêu và tăng §6(0.4 X Cấp)§7 sát thương vật lý ",
+				"§7- Tăng §6(4.4 + 0.18 X Cấp)§7 sát thương vật lý khi dùng tay không.",
+				"§7- Có §f10%§7 cơ hội hất tung mục tiêu và tăng §6(0.8 X Cấp)§7 sát thương vật lý ",
 				"§7khi đánh bằng tay không."
 				), 10d, SkillType.UNARMED);
 		setFoodRequire(5);
-		setCooldown(0.3);
+		setActiveCooldown(0.3);
 		setIcon(Material.RABBIT_FOOT);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(1 + 0.2 X Cấp)", "" + (1 + 0.2 * level)));
-    	description.replaceAll(s -> s.replace("(2.2 + 0.18 X Cấp)", "" + (2.2 + 0.18 * level)));
-    	description.replaceAll(s -> s.replace("(0.4 X Cấp)", "" + (0.4 * level)));
+    	description.replaceAll(s -> s.replace("(2 + 0.2 X Cấp)", "" + (2 + 0.2 * level)));
+    	description.replaceAll(s -> s.replace("(4.4 + 0.18 X Cấp)", "" + (4.4 + 0.18 * level)));
+    	description.replaceAll(s -> s.replace("(0.8 X Cấp)", "" + (0.8 * level)));
     	return description;
     }
 	
@@ -62,8 +62,8 @@ public class DamMoc extends Skill {
 		if (!(entity instanceof LivingEntity)) return;
 		LivingEntity target = (LivingEntity) entity;
 		if (!Utils.canAttack(user, target)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -73,8 +73,10 @@ public class DamMoc extends Skill {
 			user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 		}
 		
-		float damage = 1.0f + 0.2f * level;
-		
+		float damage = 2.0f + 0.2f * level;
+
+		if (Math.random() > 0.5) user.swingMainHand();
+		else user.swingOffHand();
 		BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 		s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 			target.setVelocity(target.getVelocity().add(new Vector(0, 0.6, 0)));
@@ -84,7 +86,7 @@ public class DamMoc extends Skill {
 		HCraftDamageSource.damageNormalAttack(user, target, damage);
 
 		//Cooldown
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 	//Passive
@@ -93,11 +95,11 @@ public class DamMoc extends Skill {
 		if (user.getEquipment().getItemInMainHand().getType().equals(Material.AIR)) {
 			if (!e.getCause().equals(DamageCause.ENTITY_ATTACK)) return;
 			//Passive1
-			double bonusDamage1 = 2.2 + 0.18 * level;
+			double bonusDamage1 = 4.4 + 0.18 * level;
 			e.setDamage(e.getDamage() + bonusDamage1);
 			//Passive2
 			double chance = 0.1;
-			double bonusDamage2 = 0.4 * level;
+			double bonusDamage2 = 0.8 * level;
 			if (Math.random() < chance) {
 				BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 				s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {

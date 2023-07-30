@@ -1,142 +1,163 @@
 package me.dakto101.util;
 
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftLivingEntity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-
 import net.minecraft.world.damagesource.DamageSource;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.ThrownPotion;
 
 public class HCraftDamageSource {
-	
-	/** 
-	 * Damage entity with specific damage. This will call EntityDamageByEntityEvent.
-	 * 
-	 * @param damager
-	 * @param target
-	 * @param dmgSrc
-	 * @param damage
-	 * @return
+
+	/**
+	 * Damage entity with generic damage. This will call EntityDamageByEntityEvent.
+	 *
+	 * @param source attacker entity that is attacking
+	 * @param target targets which the attacker is trying to attack
+	 * @param damage amount
+	 *
 	 */
-	@Deprecated
-	public static boolean damage(final LivingEntity damager, final LivingEntity target, final DamageCause dmgSrc, final double damage) {
-		if (!Utils.canAttack(damager, target)) return false;
-		EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(damager, target, dmgSrc, damage);
-		Bukkit.getServer().getPluginManager().callEvent(event);
-		
-		double finalDamage = event.getFinalDamage();
-		target.damage(finalDamage, damager);
+	public static boolean damageGeneric(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+
+		DamageSource reason = entity.getHandle().damageSources().generic();
+		entity.getHandle().hurt(reason, damage);
+
 		return true;
 	}
 
 	/**
-	 * Damage entity with specific damage.
-	 *
-	 * @param user attacker entity that is attacking
-	 * @param target target the player is trying to attack
-	 * @param src type of damage
-	 * @param damage damage
-	 *
-	 */
-
-	public static boolean damage(final LivingEntity user, final LivingEntity target, final DamageSource src, final float damage) {
-			if (!Utils.canAttack(user, target)) return false;
-			CraftLivingEntity entity = (CraftLivingEntity) target;
-			entity.getHandle().hurt(src, damage);
-			return true;
-	}
-
-	/**
-	 * Damage entity with specific damage. This only calls EntityDamageEvent.
-	 * 
-	 * @param user
-	 * @param target
-	 * @param src
-	 * @param damage
-	 * @return
-	 */
-	public static boolean damage(final LivingEntity user, final LivingEntity target, final DamageSourceEnum src, final float damage) {
-		return damage(user, target, src.getDamageSource(), damage);
-	}
-	
-	/**
 	 * Damage entity with sting damage. This will call EntityDamageByEntityEvent.
 	 *
-	 * @param user attacker entity that is attacking
-	 * @param target targets of attacker
+	 * @param source attacker entity that is attacking
+	 * @param target targets which the attacker is trying to attack
 	 * @param damage amount
 	 *
 	 */
-	public static boolean damageSting(final LivingEntity user, final LivingEntity target, final float damage) {
-			if (!Utils.canAttack(user, target)) return false;
-			CraftLivingEntity entity = (CraftLivingEntity) target;
-			//entity.getHandle().damageEntity(DamageSource.b(((CraftLivingEntity) user).getHandle()), damage);
+	public static boolean damageSting(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
 
-            entity.getHandle().hurt(DamageSource.sting(((CraftLivingEntity) user).getHandle()), damage);
-			return true;
+		DamageSource reason = entity.getHandle().damageSources().sting(((CraftLivingEntity) source).getHandle());
+		entity.getHandle().hurt(reason, damage);
+
+		return true;
 	}
-	
+
 	/**
 	 * Damage entity with normal attack damage. This will call EntityDamageByEntityEvent.
-	 *  @param user attacker entity that is attacking
-	 * @param target targets of attacker
+	 *  @param source attacker entity that is attacking
+	 * @param target targets which the attacker is trying to attack
 	 * @param damage amount
 	 *
 	 */
-	public static void damageNormalAttack(final LivingEntity user, final LivingEntity target, final float damage) {
-			if (!Utils.canAttack(user, target)) return;
-			CraftLivingEntity entity = (CraftLivingEntity) target;
-			//entity.getHandle().a(DamageSource.b(((CraftLivingEntity) user).getHandle()), damage);
-			entity.getHandle().hurt(DamageSource.mobAttack(((CraftLivingEntity) user).getHandle()), damage);
+	public static void damageNormalAttack(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+
+		DamageSource reason = entity.getHandle().damageSources().generic();
+		if (source instanceof HumanEntity) {
+			reason = entity.getHandle().damageSources().playerAttack(((CraftHumanEntity) source).getHandle());
+		} else if (source instanceof LivingEntity) {
+			reason = entity.getHandle().damageSources().mobAttack(((CraftLivingEntity) source).getHandle());
+		}
+		entity.getHandle().hurt(reason, damage);
 	}
 	
 	
 	/**
 	 * Damage entity with magic damage. This will call EntityDamageByEntityEvent.
 	 *
-	 * @param user attacker entity that is attacking
-	 * @param target targets the player is trying to attack
+	 * @param source attacker entity that is attacking
+	 * @param target targets which the attacker is trying to attack
 	 * @param damage amount
 	 *
 	 */
-	public static boolean damageMagic(final LivingEntity user, final LivingEntity target, final float damage) {
-			if (!Utils.canAttack(user, target)) return false;
-			CraftLivingEntity entity = (CraftLivingEntity) target;
-			entity.getHandle().hurt(DamageSource.indirectMagic(((CraftEntity) user).getHandle(), null), damage);
-			return true;
+	public static boolean damageIndirectMagic(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+		// Summon this to change damage type into MAGIC.
+		ThrownPotion trigger = (ThrownPotion) source.getWorld().spawnEntity(source.getLocation(), EntityType.SPLASH_POTION);
+		DamageSource reason = entity.getHandle().damageSources().indirectMagic(((CraftEntity) trigger).getHandle(), ((CraftEntity) source).getHandle());
+		entity.getHandle().hurt(reason, damage);
+		trigger.remove();
+		return true;
 	}
 	
 	/**
 	 * Damage entity with thorn damage. This will call EntityDamageByEntityEvent.
 	 *
-	 * @param user attacker entity that is attacking
-	 * @param target targets the player is trying to attack
+	 * @param source attacker entity that is attacking
+	 * @param target targets which the attacker is trying to attack
 	 * @param damage amount
 	 *
 	 */
-	public static boolean damageThorn(final LivingEntity user, final LivingEntity target, final float damage) {
-			if (!Utils.canAttack(user, target)) return false;
-			CraftLivingEntity entity = (CraftLivingEntity) target;
-			entity.getHandle().hurt(DamageSource.thorns(((CraftEntity) user).getHandle()), damage);
-			return true;
+	public static boolean damageThorns(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+
+		DamageSource reason = entity.getHandle().damageSources().thorns(((CraftEntity) source).getHandle());
+		entity.getHandle().hurt(reason, damage);
+		return true;
 	}
-	
+
 	/**
 	 * Damage entity with explode damage. This will call EntityDamageByEntityEvent.
 	 *
-	 * @param user entity that is attacking
-	 * @param target targets the player is trying to attack
+	 * @param source entity that is attacking
+	 * @param target targets which the attacker is trying to attack
 	 * @param damage amount
 	 *
 	 */
-	public static boolean damageExplode(final LivingEntity user, final LivingEntity target, final float damage) {
-			if (!Utils.canAttack(user, target)) return false;
-			CraftLivingEntity entity = (CraftLivingEntity) target;
-			entity.getHandle().hurt(DamageSource.explosion(((CraftLivingEntity) user).getHandle()), damage);
-			return true;
+	public static boolean damageExplosion(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+
+		DamageSource reason = entity.getHandle().damageSources().explosion(((CraftEntity) entity).getHandle(), ((CraftEntity) source).getHandle());
+		entity.getHandle().hurt(reason, damage);
+
+		return true;
 	}
 
-	
+	/**
+	 * Damage entity with sonic damage. This will call EntityDamageByEntityEvent.
+	 *
+	 * @param source entity that is triggering sonic boom
+	 * @param target targets which the attacker is trying to attack
+	 * @param damage amount
+	 *
+	 */
+	public static boolean damageSonicBoom(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+
+		DamageSource reason = entity.getHandle().damageSources().sonicBoom(((CraftLivingEntity) source).getHandle());
+		entity.getHandle().hurt(reason, damage);
+
+		return true;
+	}
+
+	/**
+	 * Damage entity with fall damage. This will call EntityDamageByEntityEvent.
+	 *
+	 * @param source attacker entity that is attacking
+	 * @param target targets which the attacker is trying to attack
+	 * @param damage amount
+	 *
+	 */
+	public static boolean damageFall(final LivingEntity source, final LivingEntity target, final float damage) {
+		if (!Utils.canAttack(source, target)) return false;
+		CraftLivingEntity entity = (CraftLivingEntity) target;
+
+		DamageSource reason = entity.getHandle().damageSources().fall();
+		entity.getHandle().hurt(reason, damage);
+
+		return true;
+	}
+
+
+
 }

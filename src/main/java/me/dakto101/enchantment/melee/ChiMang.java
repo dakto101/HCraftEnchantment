@@ -2,6 +2,7 @@ package me.dakto101.enchantment.melee;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
@@ -34,9 +35,8 @@ public class ChiMang extends CustomEnchantment {
 			double rawDamage = e.getOriginalDamage(DamageModifier.BASE);
 			if (rawDamage <= 0) return;
 			e.setDamage(e.getDamage() + rawDamage);
-			user.sendMessage("§e" + this.getName() + "§a gây thêm §e" + rawDamage 
-					+ " §asát thương vật lý.");
-			user.getWorld().playSound(user.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1, 1);
+			if (user instanceof Player) ((Player) user).sendTitle("", "§6+ " + (Math.round(rawDamage * 100)*0.01) + " DMG", 1, 10, 1);
+			user.getWorld().playSound(user.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, 1, 2);
 		}
 		
 

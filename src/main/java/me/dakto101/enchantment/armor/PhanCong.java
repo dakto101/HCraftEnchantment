@@ -13,7 +13,6 @@ import me.dakto101.api.Cooldown;
 import me.dakto101.api.Cooldown.CooldownType;
 import me.dakto101.api.CustomEnchantment;
 import me.dakto101.api.CustomEnchantmentType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 
 public class PhanCong extends CustomEnchantment {
@@ -36,7 +35,7 @@ public class PhanCong extends CustomEnchantment {
     public void applyDefense(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageEvent e) {
 		if (target == null) return;
 		
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ARMOR)) return;
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ARMOR_ENCHANTMENT)) return;
 		
 		if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || 
 			e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK) || 
@@ -44,11 +43,12 @@ public class PhanCong extends CustomEnchantment {
 			
 			double armor = user.getAttribute(Attribute.GENERIC_ARMOR).getValue();
 			double damage = level * 0.5 + armor * 0.1;
-			
+
+			// Tạo scheduled task để tránh deadlock
 			BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 			s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 				try {
-					HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, (float) damage);
+					HCraftDamageSource.damageThorns(user, target, (float) damage);
 					target.getWorld().playSound(target.getLocation(), Sound.ENCHANT_THORNS_HIT, 1, 1);
 					user.sendMessage("§6" + this.getName() + "§7 gây §a" + damage + ""
 							+ "§7 sát thương phép cho mục tiêu.");
@@ -59,7 +59,7 @@ public class PhanCong extends CustomEnchantment {
 				}
 			}, 1L);
 			
-			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ARMOR);
+			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ARMOR_ENCHANTMENT);
 		}
 	}
 

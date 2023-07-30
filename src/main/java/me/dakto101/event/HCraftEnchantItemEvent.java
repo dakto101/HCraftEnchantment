@@ -44,12 +44,7 @@ public class HCraftEnchantItemEvent extends Event implements Cancellable {
     	this.extra = extra;
     	this.extraLevelChance = 0d;
     	
-    	if (!check(player, equipment, book, extra)) {
-    		this.cancelled = true;
-    		return;
-    	}
-    	
-    	init();
+
     }
 
     // ---- Getters/Setters ---- //
@@ -140,136 +135,7 @@ public class HCraftEnchantItemEvent extends Event implements Cancellable {
         return handlers;
     }
     
-    // --- Functional Methods --- //
-    
-    private void init() {
-    	//get chance from enchantedbook.
-		AdvancedEnchantedBook enchantedBook = new AdvancedEnchantedBook();
-		enchantedBook.parse(book);
-		this.setChance(enchantedBook.getChance());
-		// Extra item
-		if (extra == null) return;
-		if (new Amulet().isParsable(extra)) {
-			this.removeEquipmentOnFail = false;
-			return;
-		}
-		if (new LuckyDust().isParsable(extra)) {
-			LuckyDust dust = new LuckyDust();
-			dust.parse(extra);
-			this.chance += dust.getChance();
-			return;
-		}
-		if (new MagicGem().isParsable(extra)) {
-			MagicGem gem = new MagicGem();
-			gem.parse(extra);
-			this.extraLevelChance += gem.getChance();
-			return;
-		}
-		
-		//
-    }
-    
-	/** Check the condition before enchanting.
-	 * 
-	 * @param p player who clicks the inventory.
-	 * @param item need to enchant.
-	 * @param book contains custom enchantment.
-	 * @param extra item.
-	 * @return true if satisfy the condition.
-	 */
-	private static boolean check(HumanEntity p, ItemStack item, ItemStack book, ItemStack extra) {
-		AdvancedEnchantedBook bookInfo = new AdvancedEnchantedBook();
-		if (p == null) return false;
-		if (item == null || book == null || !bookInfo.isParsable(book)) {
-			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1, 1);
-			p.sendMessage("§c§l(!) §r§cBạn cần phải thêm trang bị cần phù phép"
-					+ " và sách phù phép cao cấp vào ô.");
-			return false;
-		}
-		if (item.getAmount() > 1) {
-			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1, 1);
-			p.sendMessage("§c§l(!) §r§cSố lượng vật phẩm cần phù phép đưa vào phải bằng §e1§c.");
-			return false;
-		}
-		if (book.getAmount() > 1) {
-			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1, 1);
-			p.sendMessage("§c§l(!) §r§cSố lượng sách đưa vào phải bằng §e1§c.");
-			return false;
-		}
-		if (extra != null && extra.getAmount() > 1) {
-			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1, 1);
-			p.sendMessage("§c§l(!) §r§cSố lượng vật phẩm bổ trợ đưa vào phải bằng §e1§c.");
-			return false;
-		}
-		if (extra != null) {
-			boolean parsable = false;
-			if (new MagicGem().isParsable(extra)) parsable = true;
-			if (new LuckyDust().isParsable(extra)) parsable = true;
-			if (new Amulet().isParsable(extra)) parsable = true;
-			if (!parsable) {
-				p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1, 1);
-				p.sendMessage("§c§l(!) §r§cVật phẩm bổ trợ không hợp lệ, hãy thay bằng vật phẩm hợp lệ hoặc bỏ trống.");
-				return false;
-			}
-		}
-		if (CustomEnchantmentAPI.getCustomEnchantments(item).size() > 0) {
-			p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1, 1);
-			p.sendMessage("§c§l(!) §r§cTrang bị này đã có phù phép cao cấp rồi.");
-			return false;
-		}
-		return true;
-	}
-	
-	/** Add custom enchantment from book to item.
-	 * 
-	 */
-	public void enchant() {
-		if (this.isCancelled()) return;
-		
-		try {
-			double chance = this.getChance();
-			double extraLevelChance = this.getExtraLevelChance();
-			ItemStack item = this.getEquipment();
-			ItemStack book = this.getBook();
-			HumanEntity p = this.getPlayer();
-			//Check if success
-			boolean success = chance*0.01 > Math.random();
-			boolean extraLevelSuccess = extraLevelChance * 0.01 > Math.random();
-			int extraLevel = (extraLevelSuccess ? 1 : 0);
-			Map<CustomEnchantment, Integer> enchantments = CustomEnchantmentAPI.getCustomEnchantments(book);
-			List<CustomEnchantment> enchantmentList = new ArrayList<CustomEnchantment>(enchantments.keySet());
-			Collections.shuffle(enchantmentList);
-			for (CustomEnchantment ce : enchantmentList) {
-				if (success) {
-					if (extraLevel > 0) {
-						item = ce.addToItem(item, enchantments.get(ce) + extraLevel);
-						extraLevel = 0;
-					} else item = ce.addToItem(item, enchantments.get(ce));
-				}
-			}
-			p.getOpenInventory().setItem(10, new ItemStack(Material.AIR));
-			p.getOpenInventory().setItem(13, new ItemStack(Material.AIR));
-			p.getOpenInventory().setItem(16, new ItemStack(Material.AIR));
-			
-			if (success) {
-				p.getWorld().playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1, 1);
-				p.getInventory().addItem(item);
-				p.sendMessage("§aPhù phép thành công.");
-				if (extraLevelSuccess) {
-					p.getWorld().playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1.5f);
-					p.sendMessage("§aBạn nhận được thêm 1 cấp phù phép cộng thêm từ vật phẩm bổ trợ.");
-				}
-			} else {
-				p.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, p.getLocation(), 1);
-				p.getWorld().playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 0);
-				p.getInventory().addItem(this.isRemoveEquipmentOnFail() ? new ItemStack(Material.AIR) : item);
-				p.sendMessage("§c§l(!) §r§cPhù phép thất bại.");
-			}
-			
-		} catch (Exception ee) {
-			this.getPlayer().sendMessage("§cError...#HCraftEnchantItemEvent#enchant");
-			Bukkit.getServer().getLogger().info("§cError...#HCraftEnchantItemEvent#enchant");
-		}
-	}
+
+
 
 }

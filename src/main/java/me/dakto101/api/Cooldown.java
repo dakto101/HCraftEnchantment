@@ -9,10 +9,11 @@ import org.bukkit.entity.Entity;
 
 public class Cooldown {
 
-    private static final Map<UUID, Long> ACTIVE_TIMER = new HashMap<UUID, Long>();
-    private static final Map<UUID, Long> PASSIVE_TIMER = new HashMap<UUID, Long>();
-    private static final Map<UUID, Long> ARMOR_TIMER = new HashMap<UUID, Long>();
-    private static final Map<UUID, Long> BOW_TIMER = new HashMap<UUID, Long>();
+    private static final Map<UUID, Long> ACTIVE_SKILL_TIMER = new HashMap<UUID, Long>();
+    private static final Map<UUID, Long> PASSIVE_SKILL_TIMER = new HashMap<UUID, Long>();
+    private static final Map<UUID, Long> MELEE_ENCHANTMENT_TIMER = new HashMap<UUID, Long>();
+    private static final Map<UUID, Long> ARMOR_ENCHANTMENT_TIMER = new HashMap<UUID, Long>();
+    private static final Map<UUID, Long> BOW_ENCHANTMENT_TIMER = new HashMap<UUID, Long>();
     private static short allowSendMessage = 0;
 
     /**
@@ -25,27 +26,32 @@ public class Cooldown {
     public static void setCooldown(UUID uuid, double second, CooldownType type) {
         Validate.notNull(uuid, "UUID can't be null!");
         Validate.notNull(type, "Cooldown type can not be null!!");
-        if (ACTIVE_TIMER.size() > 100) ACTIVE_TIMER.clear();
-        if (PASSIVE_TIMER.size() > 100) PASSIVE_TIMER.clear();
-        if (ARMOR_TIMER.size() > 100) ARMOR_TIMER.clear();
-        if (BOW_TIMER.size() > 100) ARMOR_TIMER.clear();
+        if (ACTIVE_SKILL_TIMER.size() > 100) ACTIVE_SKILL_TIMER.clear();
+        if (PASSIVE_SKILL_TIMER.size() > 100) PASSIVE_SKILL_TIMER.clear();
+        if (MELEE_ENCHANTMENT_TIMER.size() > 100) MELEE_ENCHANTMENT_TIMER.clear();
+        if (ARMOR_ENCHANTMENT_TIMER.size() > 100) ARMOR_ENCHANTMENT_TIMER.clear();
+        if (BOW_ENCHANTMENT_TIMER.size() > 100) ARMOR_ENCHANTMENT_TIMER.clear();
         long time = (long) (System.currentTimeMillis() + second * 1000 + 1000);
         switch (type) {
-            case ACTIVE:
-                ACTIVE_TIMER.putIfAbsent(uuid, time);
-                ACTIVE_TIMER.replace(uuid, time);
+            case ACTIVE_SKILL:
+                ACTIVE_SKILL_TIMER.putIfAbsent(uuid, time);
+                ACTIVE_SKILL_TIMER.replace(uuid, time);
                 break;
-            case ARMOR:
-                ARMOR_TIMER.putIfAbsent(uuid, time);
-                ARMOR_TIMER.replace(uuid, time);
+            case PASSIVE_SKILL:
+                PASSIVE_SKILL_TIMER.putIfAbsent(uuid, time);
+                PASSIVE_SKILL_TIMER.replace(uuid, time);
                 break;
-            case PASSIVE:
-                PASSIVE_TIMER.putIfAbsent(uuid, time);
-                PASSIVE_TIMER.replace(uuid, time);
+            case MELEE_ENCHANTMENT:
+                MELEE_ENCHANTMENT_TIMER.putIfAbsent(uuid, time);
+                MELEE_ENCHANTMENT_TIMER.replace(uuid, time);
                 break;
-            case BOW:
-                BOW_TIMER.putIfAbsent(uuid, time);
-                BOW_TIMER.replace(uuid, time);
+            case ARMOR_ENCHANTMENT:
+                ARMOR_ENCHANTMENT_TIMER.putIfAbsent(uuid, time);
+                ARMOR_ENCHANTMENT_TIMER.replace(uuid, time);
+                break;
+            case BOW_ENCHANTMENT:
+                BOW_ENCHANTMENT_TIMER.putIfAbsent(uuid, time);
+                BOW_ENCHANTMENT_TIMER.replace(uuid, time);
                 break;
             default:
                 break;
@@ -65,21 +71,25 @@ public class Cooldown {
         double result = 0d;
         long now = System.currentTimeMillis();
         switch (type) {
-            case ACTIVE:
-                result = (ACTIVE_TIMER.get(uuid) == null) ? 0
-                        : (ACTIVE_TIMER.get(uuid) - now) / 1000;
+            case ACTIVE_SKILL:
+                result = (ACTIVE_SKILL_TIMER.get(uuid) == null) ? 0
+                        : (ACTIVE_SKILL_TIMER.get(uuid) - now) / 1000;
                 break;
-            case ARMOR:
-                result = (ARMOR_TIMER.get(uuid) == null) ? 0
-                        : (ARMOR_TIMER.get(uuid) - now) / 1000;
+            case PASSIVE_SKILL:
+                result = (PASSIVE_SKILL_TIMER.get(uuid) == null) ? 0
+                        : (PASSIVE_SKILL_TIMER.get(uuid) - now) / 1000;
                 break;
-            case PASSIVE:
-                result = (PASSIVE_TIMER.get(uuid) == null) ? 0
-                        : (PASSIVE_TIMER.get(uuid) - now) / 1000;
+            case MELEE_ENCHANTMENT:
+                result = (MELEE_ENCHANTMENT_TIMER.get(uuid) == null) ? 0
+                        : (MELEE_ENCHANTMENT_TIMER.get(uuid) - now) / 1000;
                 break;
-            case BOW:
-                result = (BOW_TIMER.get(uuid) == null) ? 0
-                        : (BOW_TIMER.get(uuid) - now) / 1000;
+            case ARMOR_ENCHANTMENT:
+                result = (ARMOR_ENCHANTMENT_TIMER.get(uuid) == null) ? 0
+                        : (ARMOR_ENCHANTMENT_TIMER.get(uuid) - now) / 1000;
+                break;
+            case BOW_ENCHANTMENT:
+                result = (BOW_ENCHANTMENT_TIMER.get(uuid) == null) ? 0
+                        : (BOW_ENCHANTMENT_TIMER.get(uuid) - now) / 1000;
                 break;
             default:
                 break;
@@ -126,10 +136,11 @@ public class Cooldown {
     }
 
     public static void clearCooldownData() {
-        ACTIVE_TIMER.clear();
-        PASSIVE_TIMER.clear();
-        BOW_TIMER.clear();
-        ARMOR_TIMER.clear();
+        ACTIVE_SKILL_TIMER.clear();
+        PASSIVE_SKILL_TIMER.clear();
+        MELEE_ENCHANTMENT_TIMER.clear();
+        BOW_ENCHANTMENT_TIMER.clear();
+        ARMOR_ENCHANTMENT_TIMER.clear();
     }
 
     /**
@@ -138,21 +149,28 @@ public class Cooldown {
     public enum CooldownType {
 
         /**
-         * For activable enchantment.
+         * For activable skill.
          */
-        ACTIVE,
+        ACTIVE_SKILL,
         /**
-         * For passive enchantment.
+         * For passive skill.
+         *
+         * Example: Normal attack effect...
          */
-        PASSIVE,
+        PASSIVE_SKILL,
+        /**
+         * For melee enchantment.
+         *
+         */
+        MELEE_ENCHANTMENT,
         /**
          * For armor enchantment.
          */
-        ARMOR,
+        ARMOR_ENCHANTMENT,
         /**
          * For bow enchantment.
          */
-        BOW,
+        BOW_ENCHANTMENT,
     }
 
 

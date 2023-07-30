@@ -31,7 +31,6 @@ import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
 import me.dakto101.api.Toggle;
 import me.dakto101.api.Toggle.ToggleType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.ParticleEffect;
 
@@ -43,7 +42,7 @@ public class MuiTenBac extends Skill {
 		super(SkillEnum.MUI_TEN_BAC, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Kéo tối đa lực bắn sẽ xuất hiện mũi tên bạc gây thêm §f2 + 0.2 X Cấp§7 ",
 				"§7sát thương chuẩn và hất tung mục tiêu. Nếu mục tiêu là quái, sát thương chuẩn ",
-				"§7gây thêm là §f6 + 0.6 X Cấp§7 và hồi máu bằng §c100%§7 sát thương chuẩn gây thêm bởi ",
+				"§7gây thêm là §f6 + 0.6 X Cấp§7 và hồi máu bằng §c35%§7 sát thương chuẩn gây thêm bởi ",
 				"§7kỹ năng. (Shift + Click trái)",
 				"",
 				"§7§nBị động:",
@@ -51,7 +50,7 @@ public class MuiTenBac extends Skill {
 				"§7không phải là người chơi."
 				), 10d, SkillType.ARCHERY);
 		setFoodRequire(2);
-		setCooldown(15);
+		setActiveCooldown(12);
 		setIcon(Material.ARROW);
 		
 	}
@@ -86,7 +85,7 @@ public class MuiTenBac extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -118,7 +117,7 @@ public class MuiTenBac extends Skill {
 		
 		user.getWorld().playSound(user.getLocation(), Sound.ITEM_TRIDENT_RETURN, 3, 0.75f);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());	
 	}
 	
@@ -133,13 +132,13 @@ public class MuiTenBac extends Skill {
 			if (name != null && name.equals(MUI_TEN_BAC)) {
 				//Param
 				double bonusDmg = (target instanceof Player) ? 2 + 0.2 * level : 6 + 0.6 * level;
-				double bonusHealth = (target instanceof Player) ? 0 : bonusDmg;
+				double bonusHealth = (target instanceof Player) ? 0 : bonusDmg * 0.35;
 				double maxHealth = user.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 				double health = user.getHealth();
 				
 				//Code
-				HCraftDamageSource.damage(user, (LivingEntity) target, DamageSourceEnum.GENERIC, (float) bonusDmg);
-				
+				HCraftDamageSource.damageGeneric(user, target, (float) bonusDmg);
+
 				BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 				s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
 					target.setVelocity(new Vector(0, 1, 0));
@@ -156,7 +155,7 @@ public class MuiTenBac extends Skill {
 			//Param
 			double bonusDmg = (target instanceof Player) ? 1 + 0.1 * level : 3 + 0.3 * level;
 			//Code
-			HCraftDamageSource.damage(user, (LivingEntity) target, DamageSourceEnum.GENERIC, (float) bonusDmg);
+			HCraftDamageSource.damageGeneric(user, target, (float) bonusDmg);
 			ParticleEffect.createNearbyParticle(target.getEyeLocation(), (int) (bonusDmg * 4), Particle.REDSTONE, 1, 1, 1, new Vector(0, 0, 0), new DustOptions(Color.GRAY, 1));
 		}
 		

@@ -28,7 +28,10 @@ public class PlayerSkillDetailGUI {
 	public static void register() {
 		registerPlayerSkillDetailGUI();
 	}
-	
+
+	public static void unregister() {
+		playerSkillDetailGUI = null;
+	}
 	
 	public static void open(HumanEntity player, SkillType skillType) {
 		if (!(player instanceof Player)) return;
@@ -77,7 +80,7 @@ public class PlayerSkillDetailGUI {
 			
 			infoLore.add("§7- Điểm kinh nghiệm: §f" + (PlayerSkill.getRequireBook(ps.getSkillLevel(skill)) - ps.getRequireBook().get(index))
 					+ " / §e" + PlayerSkill.getRequireBook(ps.getSkillLevel(skill)));
-			infoLore.add("§7- Hồi chiêu: §f" + skill.getCooldown());
+			infoLore.add("§7- Hồi chiêu: §f" + skill.getActiveCooldown());
 			infoLore.add("§7- Điểm thức ăn tiêu thụ: §f" + skill.getFoodRequire());
 			infoLore.add("§7- Dùng cho: §f" + canUse);
 			if (ps.getPlayerChosenSkill() != null && ps.getPlayerChosenSkill().equals(skill)) {

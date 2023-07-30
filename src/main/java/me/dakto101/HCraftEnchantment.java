@@ -1,5 +1,6 @@
 package me.dakto101;
 
+import me.dakto101.listener.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.dakto101.api.CustomEnchantmentAPI;
@@ -44,12 +45,6 @@ import me.dakto101.enchantment.ranged.ThuocNo;
 import me.dakto101.enchantment.ranged.TichDien;
 import me.dakto101.enchantment.ranged.XuyenGiap;
 import me.dakto101.gui.GUIManager;
-import me.dakto101.listener.CustomEnchantmentListener;
-import me.dakto101.listener.GUIListener;
-import me.dakto101.listener.ItemListener;
-import me.dakto101.listener.ListenerManager;
-import me.dakto101.listener.SkillListener;
-import me.dakto101.listener.SetNoDamageTickListener;
 import me.dakto101.skill.TestSkill;
 import me.dakto101.skill.archery.BangTien;
 import me.dakto101.skill.archery.CuNhayBungNo;
@@ -87,12 +82,13 @@ public class HCraftEnchantment extends JavaPlugin {
     	plugin = this;
     	
     	
-    	ListenerManager.registerEvent(
+    	ListenerManager.registerEvents(
     		new CustomEnchantmentListener(), 
     		new GUIListener(),
     		new ItemListener(), 
     		new SkillListener(),
-    		new SetNoDamageTickListener()
+    		new SetNoDamageTickListener(),
+			new AdminListener()
     	);
     	CommandManager.registerCommand();
     	CustomEnchantmentAPI.registerEnchantments(
@@ -136,7 +132,10 @@ public class HCraftEnchantment extends JavaPlugin {
     }
     
     public void onDisable() {
-    	
+		SkillAPI.unregisterEnchantments();
+		CustomEnchantmentAPI.unregisterEnchantments();
+		GUIManager.unregisterMenuGUI();
+    	// Unregister all
     }
     
 }

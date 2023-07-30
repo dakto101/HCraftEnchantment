@@ -13,7 +13,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import me.dakto101.HCraftEnchantment;
 import me.dakto101.api.CustomEnchantment;
 import me.dakto101.api.CustomEnchantmentType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.Utils;
 
@@ -52,7 +51,7 @@ public class TuHuy extends CustomEnchantment {
 			LivingEntity en = (LivingEntity) e;
 			if (!Utils.canAttack(user, en)) return;
 			try {
-				HCraftDamageSource.damage(user, en, DamageSourceEnum.ON_FIRE, damage);
+				HCraftDamageSource.damageExplosion(user, en, damage);
 				
 			} catch (Exception exception) {
 				Bukkit.getLogger().info("Enchant Tu huy bi loi. User = " + user.getName());

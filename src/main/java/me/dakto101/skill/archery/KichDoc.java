@@ -32,7 +32,6 @@ import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
 import me.dakto101.api.Toggle;
 import me.dakto101.api.Toggle.ToggleType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.ParticleEffect;
 
@@ -42,14 +41,14 @@ public class KichDoc extends Skill {
 
 	public KichDoc() {
 		super(SkillEnum.KICH_DOC, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Bắn ra mũi tên độc, gây thêm §9(4 + 0.35 X Cấp)§7 sát thương phép ",
-				"§7trong 4 giây, làm mục tiêu không thể di chuyển được. (Shift + Click trái)",
+				"§7§nKích hoạt:§r§7 Bắn ra mũi tên độc, gây thêm §9(5.5 + 0.45 X Cấp)§7 sát thương phép ",
+				"§7trong 4 giây, làm mục tiêu di chuyển hỗn độn trên không. (Shift + Click trái)",
 				"",
 				"§7§nBị động:",
 				"§7- Phát bắn trúng có §f10%§7 gây độc cho mục tiêu trong §f(2.5 + 0.5 X Cấp)§7 giây."
 				), 10d, SkillType.ARCHERY);
-		setFoodRequire(3);
-		setCooldown(15);
+		setFoodRequire(4);
+		setActiveCooldown(11);
 		setIcon(Material.SPIDER_EYE);
 		
 	}
@@ -57,7 +56,7 @@ public class KichDoc extends Skill {
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(4 + 0.35 X Cấp)", "" + (4 + 0.35 * level)));
+    	description.replaceAll(s -> s.replace("(5.5 + 0.45 X Cấp)", "" + (5.5 + 0.45 * level)));
     	description.replaceAll(s -> s.replace("(2.5 + 0.5 X Cấp)", "" + (2.5 + 0.5 * level)));
     	return description;
     }
@@ -82,7 +81,7 @@ public class KichDoc extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -109,7 +108,7 @@ public class KichDoc extends Skill {
 			s.cancelTask(taskID);
 		}, 200L);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());	
 	}
 	
@@ -120,17 +119,18 @@ public class KichDoc extends Skill {
 			String name = e.getDamager().getCustomName();
 			if (name != null && name.equals(KICH_DOC)) {
 				//Param
-				float damage = (float) (4 + level * 0.35);
+				float damage = (float) (5.5 + level * 0.45);
 				long duration = 80;
 				long interval = 3;
 				//Code
+				target.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, (int) duration, 1, false, false));
 				BukkitScheduler s = HCraftEnchantment.plugin.getServer().getScheduler();
 				int taskID = s.scheduleSyncRepeatingTask(HCraftEnchantment.plugin, () -> {
-					HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, damage/(duration/interval));
+					HCraftDamageSource.damageIndirectMagic(user, target, damage/(duration/interval));
+
 					target.setVelocity(new Vector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5));
 				}, 0L, interval);
 				s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
-					
 					s.cancelTask(taskID);
 				}, duration);
 			}

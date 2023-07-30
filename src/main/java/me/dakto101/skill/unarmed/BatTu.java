@@ -28,22 +28,22 @@ public class BatTu extends Skill {
 	
 	public BatTu() {
 		super(SkillEnum.BAT_TU, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Chặn toàn bộ sát thương trong §f(2 + 0.3 X Cấp)§7 giây. (Shift + Click phải)",
+				"§7§nKích hoạt:§r§7 Chặn toàn bộ sát thương trong §f(3 + 0.2 X Cấp)§7 giây. (Shift + Click phải)",
 				"",
 				"§7§nBị động:§r§7 ",
 				"§7- Có §f10%§7 cơ hội né được đòn đánh cận chiến khi dùng tay không.",
-				"§7- Tăng §6(2 + 0.2 X Cấp)§7 sát thương vật lý khi dùng tay không."
+				"§7- Tăng §6(4 + 0.2 X Cấp)§7 sát thương vật lý khi dùng tay không."
 				), 10d, SkillType.UNARMED);
 		setFoodRequire(5);
-		setCooldown(30);
+		setActiveCooldown(25);
 		setIcon(Material.TOTEM_OF_UNDYING);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(2 + 0.3 X Cấp)", "" + (2 + 0.3 * level)));
-    	description.replaceAll(s -> s.replace("(2 + 0.2 X Cấp)", "" + (2 + 0.2 * level)));
+    	description.replaceAll(s -> s.replace("(3 + 0.2 X Cấp)", "" + (3 + 0.2 * level)));
+    	description.replaceAll(s -> s.replace("(4 + 0.2 X Cấp)", "" + (4 + 0.2 * level)));
     	return description;
     }
 	
@@ -68,13 +68,14 @@ public class BatTu extends Skill {
 	@Override
 	public void applyDefense(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageEvent e) {
 		if (user.getEquipment().getItemInMainHand().getType().equals(Material.AIR)) {
-			if (e.getCause().equals(DamageCause.ENTITY_ATTACK)) {
+			if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK)) {
 				//Param
 				double chance = 0.1;
 				//Code
 				if (Math.random() > chance) return;
 				e.setCancelled(true);
 				user.getWorld().playSound(user.getLocation(), Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1, 1);
+				user.getWorld().playSound(user.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
 			}
 		}
 
@@ -85,14 +86,14 @@ public class BatTu extends Skill {
 	public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
 		if (user.getEquipment().getItemInMainHand().getType().equals(Material.AIR)) {
 			if (!e.getCause().equals(DamageCause.ENTITY_ATTACK)) return;
-			double bonusDamage = 2 + 0.2 * level;
+			double bonusDamage = 4 + 0.2 * level;
 			e.setDamage(e.getDamage() + bonusDamage);
 		}
 	}
 	
 	private void active(final Player user, final int level) {
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -102,13 +103,14 @@ public class BatTu extends Skill {
 			user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 		}
 
-		int duration = (int) (20 * (2 + 0.3 * level));
+		int duration = (int) (20 * (3 + 0.2 * level));
+		user.swingMainHand();
 		user.getWorld().playSound(user.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1, 1);
 		user.getWorld().playEffect(user.getLocation(), Effect.MOBSPAWNER_FLAMES, 20);
 		user.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, duration, 100, false, false, false));
 
 		
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 	

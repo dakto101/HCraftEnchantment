@@ -6,10 +6,10 @@ import org.bukkit.event.Listener;
 
 public class ListenerManager {
 
-	public static void registerEvent(Listener... listener) {
+	public static void registerEvents(Listener... listener) {
 		for (Listener l : listener) {
 			plugin.getServer().getPluginManager().registerEvents(l, plugin);
 		}
 	}
-	
+
 }

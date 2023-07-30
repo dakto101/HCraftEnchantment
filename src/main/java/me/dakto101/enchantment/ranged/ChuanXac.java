@@ -11,8 +11,8 @@ public class ChuanXac extends CustomEnchantment {
 
 	public ChuanXac() {
 		super("Chuẩn xác", "§7Bắn trúng kẻ địch ở khoảng cách càng xa sẽ tăng "
-				+ "càng nhiều sát thương, tối đa ở 50 ô. Sát thương cộng thêm tối đa: "
-				+ "§6116% X 1.2^(Cấp)§7.", 10);
+				+ "càng nhiều sát thương, tối đa ở 48 ô. Sát thương cộng thêm tối đa: "
+				+ "§696% X 1.2^(Cấp)§7.", 10);
 		setCanStack(false);
 		setType(CustomEnchantmentType.RANGED);
 	}
@@ -26,7 +26,7 @@ public class ChuanXac extends CustomEnchantment {
     public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
 		if (e.getCause().equals(DamageCause.PROJECTILE)) {
 			double distance = user.getLocation().distance(target.getLocation());
-			if (distance > 50) distance = 50;
+			if (distance > 48) distance = 48;
 			double bonusDamage = (Math.pow(1.1, distance) - 1) * Math.pow(1.2, level);
 			e.setDamage(e.getDamage() + bonusDamage);
 		}

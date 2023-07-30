@@ -28,7 +28,6 @@ import me.dakto101.api.Cooldown.CooldownType;
 import me.dakto101.api.Skill;
 import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 
 public class GiaoChien extends Skill {
@@ -40,23 +39,23 @@ public class GiaoChien extends Skill {
 	public GiaoChien() {
 		super(SkillEnum.GIAO_CHIEN, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Bắn ra quả cầu ma thuật, khi trúng kẻ địch sẽ đánh dấu ",
-				"§7trong 5 giây và gây §9(1 + 0.5 X Cấp)§7 sát thương phép. Kẻ địch bị đánh ",
-				"§7dấu sẽ nhận thêm §61 X Cấp + 10% máu hiện tại §7 sát thương vật lý từ ",
+				"§7trong 5 giây và gây §9(3 + 0.5 X Cấp)§7 sát thương phép. Kẻ địch bị đánh ",
+				"§7dấu sẽ nhận thêm §62 X Cấp + 12% máu hiện tại §7 sát thương vật lý từ ",
 				"§7đòn đánh cận chiến. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§r§7- Khi bị đánh có §f10%§7 nhận được lá chắn hấp thụ §e(3 + 0.5 X Cấp) sát thương."
 				), 10d, SkillType.SWORDSMANSHIP);
-		setFoodRequire(1);
-		setCooldown(13);
+		setFoodRequire(2);
+		setActiveCooldown(8);
 		setIcon(Material.SNOWBALL);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(1 + 0.5 X Cấp)", "" + (1 + 0.5 * level)));
-    	description.replaceAll(s -> s.replace("1 X Cấp", "" + (1 * level)));
+    	description.replaceAll(s -> s.replace("(3 + 0.5 X Cấp)", "" + (3 + 0.5 * level)));
+    	description.replaceAll(s -> s.replace("2 X Cấp", "" + (2 * level)));
     	description.replaceAll(s -> s.replace("(3 + 0.5 X Cấp)", "" + (3 + 0.5 * level)));
     	return description;
     }
@@ -67,8 +66,8 @@ public class GiaoChien extends Skill {
 		if (!user.isSneaking()) return;
 		if (e.getAction().equals(Action.RIGHT_CLICK_AIR) || 
 				e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-				Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+				Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 				return;
 			}
 			if (user.getFoodLevel() < getFoodRequire()) {
@@ -78,9 +77,11 @@ public class GiaoChien extends Skill {
 				user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 			}
 
+			user.swingMainHand();
+
 			World w = user.getWorld();
 			Location loc = user.getEyeLocation();
-			
+
 			Snowball ball = (Snowball) w.spawnEntity(loc, EntityType.SNOWBALL);
 			ball.setVelocity(loc.getDirection());
 			ball.setCustomName(SNOWBALL_NAME);
@@ -95,7 +96,7 @@ public class GiaoChien extends Skill {
 			
 			w.playSound(loc, Sound.ENTITY_ENDER_DRAGON_SHOOT, 1, 1);
 			
-			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+			Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		}
 	}
 	//Active
@@ -103,7 +104,7 @@ public class GiaoChien extends Skill {
     public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
 		if (e.getCause().equals(DamageCause.PROJECTILE)) {
 			if (e.getDamager().equals(SNOWBALL_LIST.get(user))) {
-				float damage = 1.0f + 0.5f * level;
+				float damage = 3.0f + 0.5f * level;
 				SNOWBALL_LIST.remove(user);
 				MARKED.putIfAbsent(user, target);
 				target.getWorld().playSound(target.getLocation(), Sound.ENTITY_SPLASH_POTION_BREAK, 1, 1);
@@ -116,18 +117,20 @@ public class GiaoChien extends Skill {
 					MARKED.remove(user, target);
 				}, 100L);
 				s.scheduleSyncDelayedTask(HCraftEnchantment.plugin, () -> {
-					HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, damage);
+					//
+					Cooldown.setCooldown(user.getUniqueId(), 0.1, CooldownType.PASSIVE_SKILL);
+					HCraftDamageSource.damageIndirectMagic(user, target, damage);
 				}, 1L);
 			}
 		}
 		
 		if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || 
 				e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK)) {
-			
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.PASSIVE_SKILL)) return;
 			double health = target.getHealth() > 100 ? 100 : target.getHealth();
-			double damage = 1 * level + 0.1 * health;
+			double damage = 2 * level + 0.12 * health;
 
-			//Apply mark
+			// Consume mark
 			if (MARKED.get(user) != null && MARKED.get(user).equals(target)) {
 				user.sendMessage("§6" + this.getName() + "§7 gây thêm §6" + damage + "§7 sát thương vật lý.");
 				e.setDamage(e.getDamage() + damage);

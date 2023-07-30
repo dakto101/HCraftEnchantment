@@ -27,7 +27,8 @@ public abstract class Skill {
 
     private boolean enabled;
     private int foodRequire;
-    private double cooldown;
+    private double activeCooldown;
+	private double passiveCooldown;
     private List<Material> materialList;
     private Material icon;
 
@@ -49,7 +50,8 @@ public abstract class Skill {
 
         enabled = true;
         foodRequire = 0;
-        cooldown = 0;
+        activeCooldown = 0;
+		passiveCooldown = 0;
         materialList = getDefaultMaterialList();
         icon = getDefaultIcon();
     }
@@ -121,19 +123,32 @@ public abstract class Skill {
 	public void setFoodRequire(int foodRequire) {
 		this.foodRequire = foodRequire;
 	}
-	
-    /**
-     * @return cooldown.
-     */
-	public double getCooldown() {
-		return cooldown;
+
+	/**
+	 * @return active cooldown.
+	 */
+	public double getActiveCooldown() {
+		return activeCooldown;
 	}
 
-    /**
-     * @param cooldown require.
-     */
-	public void setCooldown(double cooldown) {
-		this.cooldown = cooldown;
+	/**
+	 * @param activeCooldown require cooldown time.
+	 */
+	public void setActiveCooldown(double activeCooldown) {
+		this.activeCooldown = activeCooldown;
+	}
+	/**
+	 * @return passive cooldown.
+	 */
+	public double getPassiveCooldown() {
+		return this.passiveCooldown;
+	}
+
+	/**
+	 * @param passiveCooldown require cooldown time.
+	 */
+	public void setPassiveCooldown(double passiveCooldown) {
+		this.passiveCooldown = passiveCooldown;
 	}
 
     /**

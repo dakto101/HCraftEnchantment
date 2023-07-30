@@ -21,6 +21,10 @@ public class MemberMenuGUI {
 	public static void register() {
 		registerEnchantmentTypeGUI();
 	}
+
+	public static void unregister() {
+		memberMenu = null;
+	}
 	
 	private static void registerEnchantmentTypeGUI() {
 		

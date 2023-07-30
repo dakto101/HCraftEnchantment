@@ -31,7 +31,6 @@ import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
 import me.dakto101.api.Toggle;
 import me.dakto101.api.Toggle.ToggleType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.Utils;
 
@@ -42,13 +41,13 @@ public class CuNhayBungNo extends Skill {
 	public CuNhayBungNo() {
 		super(SkillEnum.CU_NHAY_BUNG_NO, Arrays.asList(
 				"§7§nKích hoạt:§r§7 Bạn sẽ theo hướng của mũi tên, phát nổ khi tiếp đất gây ",
-				"§7§9(2 + 0.2 X Cấp)§7 sát thương phép. (Shift + Click trái)",
+				"§7§9(4 + 0.4 X Cấp)§7 sát thương phép. (Shift + Click trái)",
 				"",
 				"§7§nBị động:",
 				"§7- Mũi tên bắn ra gây thêm §66% + 2% X Cấp§7 sát thương vật lý."
 				), 10d, SkillType.ARCHERY);
-		setFoodRequire(15);
-		setCooldown(60);
+		setFoodRequire(12);
+		setActiveCooldown(30);
 		setIcon(Material.FIREWORK_ROCKET);
 		
 	}
@@ -56,7 +55,7 @@ public class CuNhayBungNo extends Skill {
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(2 + 0.2 X Cấp)", "" + (3 + 0.3 * level)));
+    	description.replaceAll(s -> s.replace("(4 + 0.4 X Cấp)", "" + (4 + 0.4 * level)));
     	description.replaceAll(s -> s.replace("6% + 2% X Cấp", "" + (6 + level * 2) + "%"));
     	return description;
     }
@@ -81,8 +80,8 @@ public class CuNhayBungNo extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+			Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -94,14 +93,14 @@ public class CuNhayBungNo extends Skill {
 		//Code
 		active(user, level, e);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());
 	}
 	
 	//Active
 	private void active(final LivingEntity user, final int level, final EntityShootBowEvent e) {
 		//Param
-		float damage = (float) (2 + 0.2 * level);
+		float damage = (float) (4 + 0.4 * level);
 		double radius = 4;
 		Entity a = e.getProjectile();
 		World w = user.getWorld();
@@ -127,7 +126,7 @@ public class CuNhayBungNo extends Skill {
 							(Utils.canAttack(user, (LivingEntity) entity) && (entity.getLocation().distance(a.getLocation()) < radius)))
 					.stream().limit(10).forEach(entity -> {
 						entity.setVelocity(entity.getVelocity().add(new Vector(Math.random()*0.5, 0.8 + Math.random()*0.1, Math.random()*0.5)));
-						HCraftDamageSource.damage(user, (LivingEntity) entity, DamageSourceEnum.MAGIC, damage);
+						HCraftDamageSource.damageIndirectMagic(user, (LivingEntity) entity, damage);
 					});
 					w.spawnParticle(Particle.EXPLOSION_LARGE, a.getLocation(), 5);
 					w.createExplosion(a.getLocation(), 0f, false, false);

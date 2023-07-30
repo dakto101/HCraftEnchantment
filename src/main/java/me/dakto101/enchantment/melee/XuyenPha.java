@@ -24,8 +24,8 @@ public class XuyenPha extends CustomEnchantment {
 
 	@Override
     public void applyOnHit(final LivingEntity user, final LivingEntity target, final int level, final EntityDamageByEntityEvent e) {
-		if (e.getFinalDamage() == 0) return;
-		if (e.getDamage() == 0) return;
+		if (e.getFinalDamage() < 0.1) return;
+		if (e.getDamage() < 0.1) return;
 		if (e.getCause().equals(DamageCause.ENTITY_ATTACK) || 
 				e.getCause().equals(DamageCause.ENTITY_SWEEP_ATTACK)) {
 			
@@ -33,6 +33,7 @@ public class XuyenPha extends CustomEnchantment {
 			double pierce = 0.025 * level;
 			double bonusDamage = (e.getDamage() - e.getFinalDamage()) * pierce * e.getDamage() / e.getFinalDamage();
 
+			if (Math.abs(bonusDamage) > 100) return;
 			e.setDamage(e.getDamage() + bonusDamage);
 			if (damageReductionPercent <= 0.4) target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, 1, 1);
 		

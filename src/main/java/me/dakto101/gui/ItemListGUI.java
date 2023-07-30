@@ -28,9 +28,12 @@ public class ItemListGUI {
 	
 	public static Inventory itemListGUI;
 
-	
 	public static void register() {
 		registerItemListGUI();
+	}
+
+	public static void unregister() {
+		itemListGUI = null;
 	}
 	
 	public static void click(HumanEntity player, int slot) {

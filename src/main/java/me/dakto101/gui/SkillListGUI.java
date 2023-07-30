@@ -28,7 +28,8 @@ public class SkillListGUI {
 	public static void register() {
 		registerSkillListGUI();
 	}
-	
+
+	public static void unregister() { playerSkillDetailGUI = null; }
 	
 	public static void open(HumanEntity player, SkillType skillType) {
 		if (!(player instanceof Player) || skillType == null) return;
@@ -69,7 +70,7 @@ public class SkillListGUI {
 				infoLore.add("§fThuộc tính:");
 				infoLore.add("");
 				infoLore.add(ID_LORE + skill.getId());
-				infoLore.add("§7- Hồi chiêu: §f" + skill.getCooldown());
+				infoLore.add("§7- Hồi chiêu: §f" + skill.getActiveCooldown());
 				infoLore.add("§7- Điểm thức ăn tiêu thụ: §f" + skill.getFoodRequire());
 				infoLore.add("§7- Dùng cho: §f" + skillTypeName);
 				infoMeta.setLore(infoLore);

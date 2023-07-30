@@ -32,24 +32,24 @@ public class CanQuet extends Skill {
 
 	public CanQuet() {
 		super(SkillEnum.CAN_QUET, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Gây sát thương vật lý §62 + Cấp X 0.2§7 lên các mục tiêu trong",
-				"§7bán kính 5 ô. Sát thương tăng thêm §f60%§7 cho mục tiêu không phải người chơi. ",
+				"§7§nKích hoạt:§r§7 Gây sát thương vật lý §64 + Cấp X 0.4§7 lên các mục tiêu trong",
+				"§7bán kính 5 ô. Sát thương tăng thêm §f30%§7 cho mục tiêu không phải người chơi. ",
 				"§7(Shift + Click phải)",
 				"",
 				"§7§nBị động:",
 				"§7- Hồi máu bằng §c(4 + Cấp)%§7 sát thương gây ra từ kỹ năng và đòn đánh."
 				), 10d, SkillType.SWORDSMANSHIP);
 		setFoodRequire(3);
-		setCooldown(3);
+		setActiveCooldown(3);
 		setIcon(Material.PHANTOM_MEMBRANE);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
 		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("2 + Cấp X 0.2", "" + (2 + level * 0.2)));
-    	description.replaceAll(s -> s.replace("thêm §f60%", "thành §6" + ((2 + level * 0.2) * 1.6)));
-    	description.replaceAll(s -> s.replace("(4 + Cấp)", "" + (4 + level)));
+    	description.replaceAll(s -> s.replace("4 + Cấp X 0.4", "" + (float) (4 + level * 0.4)));
+    	description.replaceAll(s -> s.replace("thêm §f30%", "thành §6" + (float) ((4 + level * 0.4) * 1.3)));
+    	description.replaceAll(s -> s.replace("(4 + Cấp)", "" + (float) (4 + level)));
     	return description;
     }
 	
@@ -61,7 +61,7 @@ public class CanQuet extends Skill {
 		if (!user.isSneaking()) return;
 		if (!(target instanceof LivingEntity)) return;
 		if (!Utils.canAttack(user, (LivingEntity) target)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -75,16 +75,17 @@ public class CanQuet extends Skill {
 		active(user, level);
 		
 		//Cooldown
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 	}
 	
 	private void active(final Player user, final int level) {
 		//Param
 		double radius = 5;
-		float damage = (float) (2 + level * 0.2);
-		float bonusDamage = damage * 1.6f;
+		float damage = (float) (4 + level * 0.4);
+		float bonusDamage = damage * 0.3f;
 
 		//Code
+		user.swingMainHand();
 		World w = user.getWorld();
 		Location loc = user.getLocation();
 		w.spawnParticle(Particle.SMOKE_LARGE, loc, 50);

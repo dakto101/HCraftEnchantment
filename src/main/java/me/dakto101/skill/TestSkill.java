@@ -1,9 +1,10 @@
 package me.dakto101.skill;
 
-import java.util.Arrays;
-
+import me.dakto101.api.Skill;
+import me.dakto101.api.SkillEnum;
+import me.dakto101.api.SkillType;
+import me.dakto101.util.HCraftDamageSource;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pig;
@@ -18,17 +19,17 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import me.dakto101.api.Skill;
-import me.dakto101.api.SkillEnum;
-import me.dakto101.api.SkillType;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @SuppressWarnings("deprecation")
 public class TestSkill extends Skill {
 
 	public TestSkill() {
-		super(SkillEnum.TEST_SKILL, Arrays.asList("Enchant dùng để test."), -1, SkillType.OTHER);
+		super(SkillEnum.TEST_SKILL, Arrays.asList("Skill dùng để test."), -1, SkillType.OTHER);
 		setFoodRequire(0);
-		setCooldown(0);
+		setActiveCooldown(0);
+		setMaterialList(Arrays.asList(Material.STICK));
 	}
 
 	@Override
@@ -58,22 +59,16 @@ public class TestSkill extends Skill {
 	@Override
 	public void applyInteractBlock(final Player user, final int level, final PlayerInteractEvent e) { 
 		user.sendMessage("applyInteractBlock...");
-		if (e.getClickedBlock().getBlockData().getMaterial().equals(Material.DIAMOND_BLOCK)) {
-			user.sendMessage("Ok. Level = " + level);
-			user.playSound(user.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, (float) (Math.random()*2));
-		}
 	}
 	
 	@Override
     public void applyInteractEntity(final Player user, final int level, final PlayerInteractEntityEvent e) { 
-		user.sendMessage("applyInteractEntity...");
-		if (e.getRightClicked() instanceof Pig) {
-			user.sendMessage("Add passenger... Level = " + level);
-			if (!e.getRightClicked().isInsideVehicle()) {
-				user.addPassenger(e.getRightClicked());
-			}
-			user.sendMessage("isInsideVehicle? " + e.getRightClicked().isInsideVehicle());
+		if (e.getRightClicked() instanceof LivingEntity) {
+			user.sendMessage("applyInteractEntity...");
+			HCraftDamageSource.damageExplosion(user, (LivingEntity) e.getRightClicked(), 10);
+			user.sendMessage("§6damageExplosion test...");
 		}
+
 	}
 	
 	@Override

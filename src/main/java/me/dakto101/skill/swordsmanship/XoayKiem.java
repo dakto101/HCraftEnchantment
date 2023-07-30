@@ -37,22 +37,22 @@ public class XoayKiem extends Skill {
 
 	public XoayKiem() {
 		super(SkillEnum.XOAY_KIEM, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Xoay kiếm xung quanh trong 5 giây, gây §6(1.65 + Cấp X 0.18)§7 sát thương ",
+				"§7§nKích hoạt:§r§7 Xoay kiếm xung quanh trong 5 giây, gây §6(2.25 + Cấp X 0.25)§7 sát thương ",
 				"§7vật lý cho kẻ địch bị trúng chiêu. (Shift + Click phải)",
 				"",
 				"§7§nBị động:",
-				"§7- Đòn đánh thường có §f1%§7 cơ hội tăng thêm §6200% + 10% X Cấp§7 sát thương vật lý."
+				"§7- Đòn đánh thường có §f1%§7 cơ hội tăng thêm §6200% + 5% X Cấp§7 sát thương vật lý."
 				), 10d, SkillType.SWORDSMANSHIP);
-		setFoodRequire(5);
-		setCooldown(9);
+		setFoodRequire(6);
+		setActiveCooldown(16);
 		setIcon(Material.COMPASS);
 	}
 	
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
-		List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(1.65 + Cấp X 0.18)", "" + (1.65 + level * 0.18)));
-    	description.replaceAll(s -> s.replace("200% + 10% X Cấp", "" + (200 + 10 * level) + "%"));
+		List<String> description = new ArrayList<>(this.getDescription());
+    	description.replaceAll(s -> s.replace("(2.25 + Cấp X 0.25)", "" + (2.25 + level * 0.25)));
+    	description.replaceAll(s -> s.replace("200% + 5% X Cấp", "" + (200 + 5 * level) + "%"));
     	return description;
     }
 	
@@ -63,8 +63,8 @@ public class XoayKiem extends Skill {
 		if (e.getAction().equals(Action.RIGHT_CLICK_AIR) || 
 				e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
 			//Condition
-			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
-				Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE);
+			if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
+				Cooldown.sendMessage(user, this.getName(), CooldownType.ACTIVE_SKILL);
 				return;
 			}
 			if (user.getFoodLevel() < getFoodRequire()) {
@@ -79,7 +79,7 @@ public class XoayKiem extends Skill {
 			active(user, level);
 			
 			//Cooldown
-			Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+			Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		}
 	}
 	
@@ -93,8 +93,9 @@ public class XoayKiem extends Skill {
 			
 			loc.setYaw(Location.normalizeYaw(loc.getYaw() + ThreadLocalRandom.current().nextInt(30, 60)));
 			//user.teleport(loc);
-			user.playSound(loc, Sound.ENTITY_PIG_SADDLE, 1, (float) (1.5 + Math.random() * 0.5));
-			
+			user.getWorld().playSound(user.getLocation(), Sound.ENTITY_PIG_SADDLE, 1, (float) (1.5 + Math.random() * 0.5));
+			user.swingMainHand();
+
 			attack(user, level, loc);
 		}, 0L, 2L);
 		//Cancel task if player is dead
@@ -109,7 +110,7 @@ public class XoayKiem extends Skill {
 	
 	private void attack(final Player user, final int level, final Location loc) {
 		UUID uuid = user.getUniqueId();
-		float damage = (float) (1.65 + 0.18 * level);
+		float damage = (float) (2.25 + 0.25 * level);
 		//Location loc = user.getEyeLocation();
 		Vector v = loc.getDirection();
 		World w = loc.getWorld();
@@ -146,7 +147,7 @@ public class XoayKiem extends Skill {
 			if (Math.random() > chance) return;
 			if (!e.getCause().equals(DamageCause.ENTITY_ATTACK)) return;
 	    	if (target instanceof LivingEntity) {
-	    		double bonusDamage = e.getDamage(DamageModifier.BASE) * (2 + 0.1 * level);
+	    		double bonusDamage = e.getDamage(DamageModifier.BASE) * (2 + 0.05 * level);
 	    		e.setDamage(e.getDamage() + bonusDamage);
 	    		target.getWorld().spawnParticle(Particle.LAVA, target.getLocation().add(0, 1, 0), 10);
 	    		target.getWorld().playSound(target.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 1, 1);

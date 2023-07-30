@@ -34,7 +34,6 @@ import me.dakto101.api.SkillEnum;
 import me.dakto101.api.SkillType;
 import me.dakto101.api.Toggle;
 import me.dakto101.api.Toggle.ToggleType;
-import me.dakto101.util.DamageSourceEnum;
 import me.dakto101.util.HCraftDamageSource;
 import me.dakto101.util.ParticleEffect;
 
@@ -44,15 +43,15 @@ public class BangTien extends Skill {
 
 	public BangTien() {
 		super(SkillEnum.BANG_TIEN, Arrays.asList(
-				"§7§nKích hoạt:§r§7 Bắn ra mũi tên băng, gây §9(3 + 0.3 X Cấp)§7 sát thương phép ",
-				"§7và bất động mục tiêu trong §f(2 + 0.3 X Cấp)§7 giây. (Shift + Click trái)",
+				"§7§nKích hoạt:§r§7 Bắn ra mũi tên băng, gây §9(3.5 + 0.3 X Cấp)§7 sát thương phép ",
+				"§7và bất động mục tiêu trong §f(2 + 0.15 X Cấp)§7 giây. (Shift + Click trái)",
 				"",
 				"§7§nBị động:",
 				"§7- Gây thêm §64% + Cấp X 1%§7 sát thương vật lý cho mục tiêu bị làm chậm.",
 				"§7- Bắn ra mũi tên băng làm chậm mục tiêu trong §f3§7 giây."
 				), 10d, SkillType.ARCHERY);
 		setFoodRequire(6);
-		setCooldown(30);
+		setActiveCooldown(30);
 		setIcon(Material.ICE);
 		
 	}
@@ -60,8 +59,8 @@ public class BangTien extends Skill {
 	@Override
     public List<String> getDescription(int level, final LivingEntity user) {
     	List<String> description = new ArrayList<String>(this.getDescription());
-    	description.replaceAll(s -> s.replace("(3 + 0.3 X Cấp)", "" + (3 + 0.3 * level)));
-    	description.replaceAll(s -> s.replace("(2 + 0.3 X Cấp)", "" + (2 + 0.3 * level)));
+    	description.replaceAll(s -> s.replace("(3.5 + 0.3 X Cấp)", "" + (3.5 + 0.3 * level)));
+    	description.replaceAll(s -> s.replace("(2 + 0.15 X Cấp)", "" + (2 + 0.15 * level)));
     	description.replaceAll(s -> s.replace("4% + Cấp X 1%", "" + (4 + level * 1) + "%"));
     	return description;
     }
@@ -87,7 +86,7 @@ public class BangTien extends Skill {
 		Player user = (Player) u;
 		if (!(user instanceof Player)) return;
 		if (!Toggle.getToggle(user.getUniqueId(), ToggleType.ACTIVE_SKILL)) return;
-		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE)) {
+		if (Cooldown.onCooldown(user.getUniqueId(), CooldownType.ACTIVE_SKILL)) {
 			return;
 		}
 		if (user.getFoodLevel() < getFoodRequire()) {
@@ -114,7 +113,7 @@ public class BangTien extends Skill {
 			s.cancelTask(taskID);
 		}, 200L);
 		//Cooldown and food
-		Cooldown.setCooldown(user.getUniqueId(), getCooldown(), CooldownType.ACTIVE);
+		Cooldown.setCooldown(user.getUniqueId(), getActiveCooldown(), CooldownType.ACTIVE_SKILL);
 		user.setFoodLevel(user.getFoodLevel() - getFoodRequire());	
 	}
 	
@@ -126,11 +125,11 @@ public class BangTien extends Skill {
 			if (name != null && name.equals(BANG_TIEN)) {
 				//Param
 				Location loc = target.getLocation();
-				float damage = (float) (3 + level * 0.3);
-				int duration = 100;
+				float damage = (float) (3.5 + level * 0.3);
+				int duration = (int) ((2 + 0.15 * level) * 20);
 				long interval = 1;
 				//Code
-				HCraftDamageSource.damage(user, target, DamageSourceEnum.MAGIC, damage);
+				HCraftDamageSource.damageIndirectMagic(user, target, damage);
 				target.removePotionEffect(PotionEffectType.WEAKNESS);
 				target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, duration, 99, false, false, false));
 				target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration, 0, false, false, false));
@@ -161,7 +160,6 @@ public class BangTien extends Skill {
 			int duration = 3 * 20;
 			//Code
 			target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, duration, 1, true, true, true));
-			
 			
 		}
 	}
